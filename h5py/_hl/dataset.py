@@ -41,16 +41,17 @@ def readtime_dtype(basetype, names):
         raise ValueError("Field names only allowed for compound types")
 
     for name in names:  # Check all names are legal
-        if not name in basetype.names:
+        if name not in basetype.names:
             raise ValueError("Field %s does not appear in this type." % name)
 
     return numpy.dtype([(name, basetype.fields[name][0]) for name in names])
 
 
-def make_new_dset(parent, shape=None, dtype=None, data=None,
-                 chunks=None, compression=None, shuffle=None,
-                    fletcher32=None, maxshape=None, compression_opts=None,
-                  fillvalue=None, scaleoffset=None, track_times=None):
+def make_new_dset(
+    parent, shape=None, dtype=None, data=None, chunks=None, compression=None,
+    shuffle=None, fletcher32=None, maxshape=None, compression_opts=None,
+    fillvalue=None, scaleoffset=None, track_times=None
+):
     """ Return a new low-level dataset identifier
 
     Only creates anonymous datasets.
@@ -97,7 +98,7 @@ def make_new_dset(parent, shape=None, dtype=None, data=None,
         tid = h5t.py_create(dtype, logical=1)
 
     # Legacy
-    if any((compression, shuffle, fletcher32, maxshape,scaleoffset)) and chunks is False:
+    if any((compression, shuffle, fletcher32, maxshape, scaleoffset)) and chunks is False:
         raise ValueError("Chunked format required for given storage options")
 
     # Legacy
@@ -110,11 +111,12 @@ def make_new_dset(parent, shape=None, dtype=None, data=None,
     if compression in _LEGACY_GZIP_COMPRESSION_VALS:
         if compression_opts is not None:
             raise TypeError("Conflict in compression options")
-        compression_opts = compression
+        compression_opts = compression # pylint: disable=redefined-variable-type
         compression = 'gzip'
 
-    dcpl = filters.generate_dcpl(shape, dtype, chunks, compression, compression_opts,
-                  shuffle, fletcher32, maxshape, scaleoffset)
+    dcpl = filters.generate_dcpl(
+        shape, dtype, chunks, compression, compression_opts, shuffle, fletcher32, maxshape, scaleoffset
+    )
 
     if fillvalue is not None:
         fillvalue = numpy.array(fillvalue)
@@ -147,7 +149,7 @@ class AstypeContext(object):
     """
         Context manager which allows changing the type read from a dataset.
     """
-    
+
     def __init__(self, dset, dtype):
         self._dset = dset
         self._dtype = numpy.dtype(dtype)
@@ -183,7 +185,7 @@ class Dataset(HLObject):
     """
         Represents an HDF5 dataset
     """
-        
+
     def astype(self, dtype):
         """ Get a context manager allowing you to perform reads to a
         different destination type, e.g.:
@@ -354,7 +356,7 @@ class Dataset(HLObject):
                 size = list(self.shape)
                 size[axis] = newlen
 
-            size = tuple(size)
+            size = tuple(size) # pylint: disable=redefined-variable-type
             self.id.set_extent(size)
             #h5f.flush(self.id)  # THG recommends
 
@@ -453,7 +455,7 @@ class Dataset(HLObject):
             # These are the only access methods NumPy allows for such objects
             if args == (Ellipsis,) or args == tuple():
                 return numpy.empty(self.shape, dtype=new_dtype)
-            
+
         # === Scalar dataspaces =================
 
         if self.shape == ():
@@ -497,7 +499,7 @@ class Dataset(HLObject):
         if len(names) == 1:
             arr = arr[names[0]]     # Single-field recarray convention
         if arr.shape == ():
-            arr = numpy.asscalar(arr)
+            arr = numpy.asscalar(arr) # pylint: disable=no-member
         if single_element:
             arr = arr[0]
         return arr
@@ -543,10 +545,10 @@ class Dataset(HLObject):
         elif self.dtype.kind == "O" or \
           (self.dtype.kind == 'V' and \
           (not isinstance(val, numpy.ndarray) or val.dtype.kind != 'V') and \
-          (self.dtype.subdtype == None)):
+          (self.dtype.subdtype is None)):
             if len(names) == 1 and self.dtype.fields is not None:
                 # Single field selected for write, from a non-array source
-                if not names[0] in self.dtype.fields:
+                if names[0] not in self.dtype.fields:
                     raise ValueError("No such field for indexing: %s" % names[0])
                 dtype = self.dtype.fields[names[0]][0]
                 cast_compound = True
@@ -582,7 +584,7 @@ class Dataset(HLObject):
             if len(mismatch) != 0:
                 mismatch = ", ".join('"%s"'%x for x in mismatch)
                 raise ValueError("Illegal slicing argument (fields %s not in dataset type)" % mismatch)
-        
+
             # Write non-compound source into a single dataset field
             if len(names) == 1 and val.dtype.fields is None:
                 subtype = h5t.py_create(val.dtype)
@@ -710,26 +712,26 @@ class Dataset(HLObject):
         if six.PY2:
             return r.encode('utf8')
         return r
-        
+
     if hasattr(h5d.DatasetID, "refresh"):
         @with_phil
         def refresh(self):
             """ Refresh the dataset metadata by reloading from the file.
-            
+
             This is part of the SWMR features and only exist when the HDF5
             librarary version >=1.9.178
             """
             self._id.refresh()
-                
+
     if hasattr(h5d.DatasetID, "flush"):
         @with_phil
         def flush(self):
             """ Flush the dataset data and metadata to the file.
             If the dataset is chunked, raw data chunks are written to the file.
-            
-            This is part of the SWMR features and only exist when the HDF5 
+
+            This is part of the SWMR features and only exist when the HDF5
             librarary version >=1.9.178
             """
             self._id.flush()
-            
+
 

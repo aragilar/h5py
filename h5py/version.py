@@ -14,9 +14,11 @@
 from __future__ import absolute_import
 
 from collections import namedtuple
-from . import h5 as _h5
 import sys
+
 import numpy
+
+from . import h5 as _h5
 
 # All should be integers, except pre, as validating versions is more than is
 # needed for our use case

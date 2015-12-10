@@ -34,7 +34,7 @@ def select(shape, args, dsid):
     args
         Either a single argument or a tuple of arguments.  See below for
         supported classes of argument.
-    
+
     dsid
         A h5py.h5d.DatasetID instance representing the source dataset.
 
@@ -76,7 +76,7 @@ def select(shape, args, dsid):
             sid = h5r.get_region(arg, dsid)
             if shape != sid.shape:
                 raise TypeError("Reference shape does not match dataset shape")
-                
+
             return Selection(shape, spaceid=sid)
 
     for a in args:
@@ -86,10 +86,10 @@ def select(shape, args, dsid):
                 if isinstance(a, np.ndarray) and a.shape == (1,):
                     raise Exception()
             except Exception:
-                sel = FancySelection(shape)
+                sel = FancySelection(shape) # pylint: disable=redefined-variable-type
                 sel[args]
                 return sel
-    
+
     sel = SimpleSelection(shape)
     sel[args]
     return sel
@@ -123,7 +123,7 @@ class Selection(object):
         Base class for HDF5 dataspace selections.  Subclasses support the
         "selection protocol", which means they have at least the following
         members:
-        
+
         __init__(shape)   => Create a new selection on "shape"-tuple
         __getitem__(args) => Perform a selection with the range specified.
                              What args are allowed depends on the
@@ -131,7 +131,7 @@ class Selection(object):
 
         id (read-only) =>      h5py.h5s.SpaceID instance
         shape (read-only) =>   The shape of the dataspace.
-        mshape  (read-only) => The shape of the selection region. 
+        mshape  (read-only) => The shape of the selection region.
                                Not guaranteed to fit within "shape", although
                                the total number of points is less than
                                product(shape).
@@ -210,7 +210,7 @@ class PointSelection(Selection):
         """ Perform point-wise selection from a NumPy boolean array """
         if not (isinstance(arg, np.ndarray) and arg.dtype.kind == 'b'):
             raise TypeError("PointSelection __getitem__ only works with bool arrays")
-        if not arg.shape == self.shape:
+        if arg.shape != self.shape:
             raise TypeError("Boolean indexing array has incompatible shape")
 
         points = np.transpose(arg.nonzero())
@@ -251,7 +251,7 @@ class SimpleSelection(Selection):
 
         if not isinstance(args, tuple):
             args = (args,)
-  
+
         if self.shape == ():
             if len(args) > 0 and args[0] not in (Ellipsis, ()):
                 raise TypeError("Invalid index for scalar dataset (only ..., () allowed)")
@@ -298,7 +298,7 @@ class SimpleSelection(Selection):
                 else:
                     raise TypeError("Can't broadcast %s -> %s" % (target_shape, count))
         tshape.reverse()
-        tshape = tuple(tshape)
+        tshape = tuple(tshape) # pylint: disable=redefined-variable-type
 
         chunks = tuple(x//y for x, y in zip(count, tshape))
         nchunks = int(np.product(chunks))
@@ -309,7 +309,11 @@ class SimpleSelection(Selection):
             sid = self._id.copy()
             sid.select_hyperslab((0,)*rank, tshape, step)
             for idx in xrange(nchunks):
-                offset = tuple(x*y*z + s for x, y, z, s in zip(np.unravel_index(idx, chunks), tshape, step, start))
+                offset = tuple(
+                    x*y*z + s for x, y, z, s in zip(
+                        np.unravel_index(idx, chunks), tshape, step, start # pylint: disable=no-member
+                    )
+                )
                 sid.offset_simple(offset)
                 yield sid
 
@@ -339,7 +343,7 @@ class FancySelection(Selection):
         if not isinstance(args, tuple):
             args = (args,)
 
-        args = _expand_ellipsis(args, len(self.shape))
+        args = _expand_ellipsis(args, len(self.shape)) # pylint: disable=redefined-variable-type
 
         # First build up a dictionary of (position:sequence) pairs
 
@@ -390,7 +394,7 @@ class FancySelection(Selection):
         # they correspond to sequence entries
 
         mshape = list(count)
-        for idx in xrange(len(mshape)):
+        for idx in xrange(len(mshape)): # pylint: disable=consider-using-enumerate
             if idx in sequenceargs:
                 mshape[idx] = len(sequenceargs[idx])
             elif scalar[idx]:
@@ -399,7 +403,7 @@ class FancySelection(Selection):
         self._mshape = tuple(x for x in mshape if x != 0)
 
     def broadcast(self, target_shape):
-        if not target_shape == self.mshape:
+        if target_shape != self.mshape:
             raise TypeError("Broadcasting is not supported for complex selections")
         yield self._id
 
@@ -478,8 +482,8 @@ def _translate_slice(exp, length):
         for use with the hyperslab selection routines
     """
     start, stop, step = exp.indices(length)
-        # Now if step > 0, then start and stop are in [0, length]; 
-        # if step < 0, they are in [-1, length - 1] (Python 2.6b2 and later; 
+        # Now if step > 0, then start and stop are in [0, length];
+        # if step < 0, they are in [-1, length - 1] (Python 2.6b2 and later;
         # Python issue 3004).
 
     if step < 1:
@@ -495,7 +499,7 @@ def guess_shape(sid):
     """ Given a dataspace, try to deduce the shape of the selection.
 
     Returns one of:
-        * A tuple with the selection shape, same length as the dataspace 
+        * A tuple with the selection shape, same length as the dataspace
         * A 1D selection shape for point-based and multiple-hyperslab selections
         * None, for unselected scalars and for NULL dataspaces
     """

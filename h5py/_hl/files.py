@@ -33,7 +33,7 @@ if hdf5_version >= h5.get_config().swmr_min_hdf5_version:
     swmr_support = True
 
 if mpi:
-    import mpi4py
+    import mpi4py # pylint: disable=wrong-import-position
 
 libver_dict = {'earliest': h5f.LIBVER_EARLIEST, 'latest': h5f.LIBVER_LATEST}
 libver_dict_r = dict((y, x) for x, y in six.iteritems(libver_dict))

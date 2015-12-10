@@ -11,7 +11,7 @@
     This is the h5py package, a Python interface to the HDF5
     scientific data format.
 """
-
+# pylint: disable=wrong-import-position
 from __future__ import absolute_import
 
 from warnings import warn as _warn
@@ -23,9 +23,9 @@ from warnings import warn as _warn
 # Python sees the "h5py" source directory and tries to load it, which fails.
 # We tried working around this by using "package_dir" but that breaks Cython.
 try:
-    from . import _errors
+    from . import _errors # pylint: disable=wrong-import-position
 except ImportError:
-    import os.path as _op
+    import os.path as _op # pylint: disable=wrong-import-position
     if _op.exists(_op.join(_op.dirname(__file__), '..', 'setup.py')):
         raise ImportError("You cannot import h5py from inside the install directory.\nChange to another directory first.")
     else:

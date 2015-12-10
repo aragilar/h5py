@@ -14,6 +14,7 @@
 from __future__ import absolute_import
 
 import posixpath as pp
+
 import six
 import numpy
 
@@ -123,18 +124,18 @@ class Group(HLObject, MutableMappingHDF5):
         shape or dtype don't match according to the above rules.
         """
         with phil:
-            if not name in self:
+            if name not in self:
                 return self.create_dataset(name, *(shape, dtype), **kwds)
 
             dset = self[name]
             if not isinstance(dset, dataset.Dataset):
                 raise TypeError("Incompatible object (%s) already exists" % dset.__class__.__name__)
 
-            if not shape == dset.shape:
+            if shape != dset.shape:
                 raise TypeError("Shapes do not match (existing %s vs new %s)" % (dset.shape, shape))
 
             if exact:
-                if not dtype == dset.dtype:
+                if dtype != dset.dtype:
                     raise TypeError("Datatypes do not exactly match (existing %s vs new %s)" % (dset.dtype, dtype))
             elif not numpy.can_cast(dtype, dset.dtype):
                 raise TypeError("Datatypes cannot be safely cast (existing %s vs new %s)" % (dset.dtype, dtype))
@@ -148,7 +149,7 @@ class Group(HLObject, MutableMappingHDF5):
         isn't a group.
         """
         with phil:
-            if not name in self:
+            if name not in self:
                 return self.create_group(name)
             grp = self[name]
             if not isinstance(grp, Group):
@@ -209,7 +210,7 @@ class Group(HLObject, MutableMappingHDF5):
                 except KeyError:
                     return default
 
-            if not name in self:
+            if name not in self:
                 return default
 
             elif getclass and not getlink:
@@ -230,7 +231,7 @@ class Group(HLObject, MutableMappingHDF5):
                         return SoftLink
                     linkbytes = self.id.links.get_val(self._e(name))
                     return SoftLink(self._d(linkbytes))
-                    
+
                 elif typecode == h5l.TYPE_EXTERNAL:
                     if getclass:
                         return ExternalLink
@@ -238,10 +239,10 @@ class Group(HLObject, MutableMappingHDF5):
                     return ExternalLink(
                         filename_decode(filebytes), self._d(linkbytes)
                     )
-                    
+
                 elif typecode == h5l.TYPE_HARD:
                     return HardLink if getclass else HardLink()
-                    
+
                 else:
                     raise TypeError("Unknown link type")
 

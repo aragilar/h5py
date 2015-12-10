@@ -13,18 +13,21 @@
 
 from __future__ import absolute_import
 
-import posixpath
+from collections import (
+    Mapping, MutableMapping, KeysView, ValuesView, ItemsView
+)
 import os
+import posixpath
+import sys
+
 import six
-from collections import (Mapping, MutableMapping, KeysView, 
-                         ValuesView, ItemsView)
 
 from .compat import fspath, filename_encode
 
 from .. import h5d, h5i, h5r, h5p, h5f, h5t, h5s
 
 # The high-level interface is serialized; every public API function & method
-# is wrapped in a lock.  We re-use the low-level lock because (1) it's fast, 
+# is wrapped in a lock.  We re-use the low-level lock because (1) it's fast,
 # and (2) it eliminates the possibility of deadlocks due to out-of-order
 # lock acquisition.
 from .._objects import phil, with_phil
@@ -305,11 +308,11 @@ class ValuesViewHDF5(ValuesView):
 
     """
         Wraps e.g. a Group or AttributeManager to provide a value view.
-        
+
         Note that __contains__ will have poor performance as it has
         to scan all the links or attributes.
     """
-    
+
     def __contains__(self, value):
         with phil:
             for key in self._mapping:
@@ -328,7 +331,7 @@ class ItemsViewHDF5(ItemsView):
     """
         Wraps e.g. a Group or AttributeManager to provide an items view.
     """
-        
+
     def __contains__(self, item):
         with phil:
             key, val = item
@@ -347,7 +350,7 @@ class MappingHDF5(Mapping):
     """
         Wraps a Group, AttributeManager or DimensionManager object to provide
         an immutable mapping interface.
-        
+
         We don't inherit directly from MutableMapping because certain
         subclasses, for example DimensionManager, are read-only.
     """
