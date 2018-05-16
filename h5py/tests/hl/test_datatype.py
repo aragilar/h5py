@@ -8,18 +8,20 @@ from itertools import count
 import numpy as np
 import h5py
 
-from ..common import ut, TestCase
+from ..common import TestCase
+
 
 class TestVlen(TestCase):
 
     """
         Check that storage of vlen strings is carried out correctly.
     """
+
     def assertVlenArrayEqual(self, dset, arr, message=None, precision=None):
         self.assert_(
             dset.shape == arr.shape,
             "Shape mismatch (%s vs %s)%s" % (dset.shape, arr.shape, message)
-            )
+        )
         for (i, d, a) in zip(count(), dset, arr):
             self.assertArrayEqual(d, a, message, precision)
 
@@ -35,6 +37,7 @@ class TestVlen(TestCase):
 
     def test_compound_vlen_bool(self):
         vidt = h5py.special_dtype(vlen=np.uint8)
+
         def a(items):
             return np.array(items, dtype=np.uint8)
 
@@ -44,21 +47,23 @@ class TestVlen(TestCase):
             ('foo', vidt),
             ('logical', np.bool)])
         vb = f.create_dataset('dt_vb', shape=(4,), dtype=dt_vb)
-        data = np.array([(a([1,2,3]), True),
-                         (a([1    ]), False),
-                         (a([1,5  ]), True),
-                         (a([],    ), False),],
-                     dtype=dt_vb)
+        data = np.array([(a([1, 2, 3]), True),
+                         (a([1]), False),
+                         (a([1, 5]), True),
+                         (a([],), False), ],
+                        dtype=dt_vb)
         vb[:] = data
         actual = f['dt_vb'][:]
         self.assertVlenArrayEqual(data['foo'], actual['foo'])
         self.assertArrayEqual(data['logical'], actual['logical'])
 
+        # TODO: We don't assert anything about the dataset...
         dt_vv = np.dtype([
             ('foo', vidt),
             ('bar', vidt)])
         f.create_dataset('dt_vv', shape=(4,), dtype=dt_vv)
 
+        # TODO: We don't assert anything about the dataset...
         dt_vvb = np.dtype([
             ('foo', vidt),
             ('bar', vidt),
@@ -70,9 +75,9 @@ class TestVlen(TestCase):
             ('foo', vidt),
             ('bar', vidt)])
         bvv = f.create_dataset('dt_bvv', shape=(2,), dtype=dt_bvv)
-        data = np.array([(True,  a([1,2,3]), a([1,2]) ),
-                         (False, a([]),      a([2,4,6])),],
-                         dtype=bvv)
+        data = np.array([(True, a([1, 2, 3]), a([1, 2])),
+                         (False, a([]), a([2, 4, 6])), ],
+                        dtype=bvv)
         bvv[:] = data
         actual = bvv[:]
         self.assertVlenArrayEqual(data['foo'], actual['foo'])
@@ -82,6 +87,7 @@ class TestVlen(TestCase):
     def test_compound_vlen_enum(self):
         eidt = h5py.special_dtype(enum=(np.uint8, {'OFF': 0, 'ON': 1}))
         vidt = h5py.special_dtype(vlen=np.uint8)
+
         def a(items):
             return np.array(items, dtype=np.uint8)
 
@@ -92,9 +98,9 @@ class TestVlen(TestCase):
             ('bar', vidt),
             ('switch', eidt)])
         vve = f.create_dataset('dt_vve', shape=(2,), dtype=dt_vve)
-        data = np.array([(a([1,2,3]), a([1,2]),   1),
-                         (a([]),      a([2,4,6]), 0),],
-                         dtype=dt_vve)
+        data = np.array([(a([1, 2, 3]), a([1, 2]), 1),
+                         (a([]), a([2, 4, 6]), 0), ],
+                        dtype=dt_vve)
         vve[:] = data
         actual = vve[:]
         self.assertVlenArrayEqual(data['foo'], actual['foo'])
@@ -103,17 +109,17 @@ class TestVlen(TestCase):
 
     def test_vlen_enum(self):
         fname = self.mktemp()
-        arr1 = [[1],[1,2]]
+        arr1 = [[1], [1, 2]]
         dt1 = h5py.special_dtype(vlen=h5py.special_dtype(
             enum=('i', dict(foo=1, bar=2))))
 
-        with h5py.File(fname,'w') as f:
+        with h5py.File(fname, 'w') as f:
             df1 = f.create_dataset('test', (len(arr1),), dtype=dt1)
             df1[:] = np.array(arr1)
 
-        with h5py.File(fname,'r') as f:
-            df2  = f['test']
-            dt2  = df2.dtype
+        with h5py.File(fname, 'r') as f:
+            df2 = f['test']
+            dt2 = df2.dtype
             arr2 = [e.tolist() for e in df2[:]]
 
         self.assertEqual(arr1, arr2)
@@ -143,7 +149,7 @@ class TestOffsets(TestCase):
                 if logical and np_align:
                     # Vlen types have different size in the numpy struct
                     self.assertRaises(TypeError, h5py.h5t.py_create, dt,
-                            logical=logical)
+                                      logical=logical)
                 else:
                     ht = h5py.h5t.py_create(dt, logical=logical)
                     offsets = [ht.get_member_offset(i)
@@ -160,13 +166,12 @@ class TestOffsets(TestCase):
             [ht.get_member_offset(i) for i in range(ht.get_nmembers())]
         )
 
-
     def test_aligned_data(self):
         dt = np.dtype('i2,f8', align=True)
         data = np.empty(10, dtype=dt)
 
         data['f0'] = np.array(np.random.randint(-100, 100, size=data.size),
-                dtype='i2')
+                              dtype='i2')
         data['f1'] = np.random.rand(data.size)
 
         fname = self.mktemp()
@@ -177,17 +182,16 @@ class TestOffsets(TestCase):
         with h5py.File(fname, 'r') as f:
             self.assertArrayEqual(f['data'], data)
 
-
     def test_out_of_order_offsets(self):
         dt = np.dtype({
-            'names' : ['f1', 'f2', 'f3'],
-            'formats' : ['<f4', '<i4', '<f8'],
-            'offsets' : [0, 16, 8]
+            'names': ['f1', 'f2', 'f3'],
+            'formats': ['<f4', '<i4', '<f8'],
+            'offsets': [0, 16, 8]
         })
         data = np.empty(10, dtype=dt)
         data['f1'] = np.random.rand(data.size)
         data['f2'] = np.random.random_integers(-10, 10, data.size)
-        data['f3'] = np.random.rand(data.size)*-1
+        data['f3'] = np.random.rand(data.size) * -1
 
         fname = self.mktemp()
 

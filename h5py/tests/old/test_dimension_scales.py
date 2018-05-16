@@ -14,7 +14,7 @@ import sys
 import numpy as np
 
 from ..common import ut, TestCase
-from h5py.highlevel import File, Group, Dataset
+from h5py import File, Group, Dataset
 import h5py
 
 
@@ -69,7 +69,7 @@ class TestH5DSBindings(BaseDataset):
     def test_attach_dimensionscale(self):
         self.assertTrue(
             h5py.h5ds.is_attached(self.f['data'].id, self.f['x1'].id, 2)
-            )
+        )
         self.assertFalse(
             h5py.h5ds.is_attached(self.f['data'].id, self.f['x1'].id, 1))
         self.assertEqual(h5py.h5ds.get_num_scales(self.f['data'].id, 0), 0)
@@ -79,18 +79,18 @@ class TestH5DSBindings(BaseDataset):
     def test_detach_dimensionscale(self):
         self.assertTrue(
             h5py.h5ds.is_attached(self.f['data'].id, self.f['x1'].id, 2)
-            )
+        )
         h5py.h5ds.detach_scale(self.f['data'].id, self.f['x1'].id, 2)
         self.assertFalse(
             h5py.h5ds.is_attached(self.f['data'].id, self.f['x1'].id, 2)
-            )
+        )
         self.assertEqual(h5py.h5ds.get_num_scales(self.f['data'].id, 2), 1)
 
     # TODO: update condition once the bug is fixed upstream
     @ut.skipUnless(
         h5py.version.hdf5_version_tuple > (2, 0, 0),
         "Reading non-existent label segfaults"
-        )
+    )
     def test_label_dimensionscale(self):
         self.assertEqual(h5py.h5ds.get_label(self.f['data'].id, 0), b'z')
         self.assertEqual(h5py.h5ds.get_label(self.f['data'].id, 1), b'')
@@ -130,7 +130,7 @@ class TestDimensionManager(BaseDataset):
         self.assertEqual(
             [d for d in dims],
             [dims[0], dims[1], dims[2]]
-            )
+        )
 
 
 class TestDimensionsHighLevel(BaseDataset):
@@ -181,7 +181,7 @@ class TestDimensionsHighLevel(BaseDataset):
         self.assertEqual(
             self.f['data'].dims[2].items(),
             [('', self.f['x1']), ('x2 name', self.f['x2'])]
-            )
+        )
 
     def test_get_keys(self):
         self.assertEqual(self.f['data'].dims[2].keys(), ['', 'x2 name'])
@@ -190,7 +190,7 @@ class TestDimensionsHighLevel(BaseDataset):
         self.assertEqual(
             self.f['data'].dims[2].values(),
             [self.f['x1'], self.f['x2']]
-            )
+        )
 
     def test_iter(self):
         self.assertEqual([i for i in self.f['data'].dims[2]], ['', 'x2 name'])

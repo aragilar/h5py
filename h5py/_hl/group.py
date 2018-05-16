@@ -39,11 +39,9 @@ class Group(HLObject, MutableMappingHDF5):
                 raise ValueError("%s is not a GroupID" % bind)
             HLObject.__init__(self, bind)
 
-
     _gcpl_crt_order = h5p.create(h5p.GROUP_CREATE)
     _gcpl_crt_order.set_link_creation_order(
         h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
-
 
     def create_group(self, name, track_order=False):
         """ Create and return a new subgroup.
@@ -138,16 +136,24 @@ class Group(HLObject, MutableMappingHDF5):
 
             dset = self[name]
             if not isinstance(dset, dataset.Dataset):
-                raise TypeError("Incompatible object (%s) already exists" % dset.__class__.__name__)
+                raise TypeError(
+                    "Incompatible object (%s) already exists" %
+                    dset.__class__.__name__)
 
             if not shape == dset.shape:
-                raise TypeError("Shapes do not match (existing %s vs new %s)" % (dset.shape, shape))
+                raise TypeError(
+                    "Shapes do not match (existing %s vs new %s)" %
+                    (dset.shape, shape))
 
             if exact:
                 if not dtype == dset.dtype:
-                    raise TypeError("Datatypes do not exactly match (existing %s vs new %s)" % (dset.dtype, dtype))
+                    raise TypeError(
+                        "Datatypes do not exactly match (existing %s vs new %s)" %
+                        (dset.dtype, dtype))
             elif not numpy.can_cast(dtype, dset.dtype):
-                raise TypeError("Datatypes cannot be safely cast (existing %s vs new %s)" % (dset.dtype, dtype))
+                raise TypeError(
+                    "Datatypes cannot be safely cast (existing %s vs new %s)" %
+                    (dset.dtype, dtype))
 
             return dset
 
@@ -162,7 +168,9 @@ class Group(HLObject, MutableMappingHDF5):
                 return self.create_group(name)
             grp = self[name]
             if not isinstance(grp, Group):
-                raise TypeError("Incompatible object (%s) already exists" % grp.__class__.__name__)
+                raise TypeError(
+                    "Incompatible object (%s) already exists" %
+                    grp.__class__.__name__)
             return grp
 
     @with_phil
@@ -288,7 +296,7 @@ class Group(HLObject, MutableMappingHDF5):
 
             elif isinstance(obj, SoftLink):
                 self.id.links.create_soft(name, self._e(obj.path),
-                              lcpl=lcpl, lapl=self._lapl)
+                                          lcpl=lcpl, lapl=self._lapl)
 
             elif isinstance(obj, ExternalLink):
                 do_link = True
@@ -298,7 +306,8 @@ class Group(HLObject, MutableMappingHDF5):
                 htype.commit(self.id, name, lcpl=lcpl)
 
             else:
-                ds = self.create_dataset(None, data=obj, dtype=base.guess_dtype(obj))
+                ds = self.create_dataset(
+                    None, data=obj, dtype=base.guess_dtype(obj))
                 h5o.link(ds.id, self.id, name, lcpl=lcpl)
 
         if do_link:
@@ -379,7 +388,8 @@ class Group(HLObject, MutableMappingHDF5):
                     dest_path = name
                 else:
                     # copy source into dest group: dest_name/source_name
-                    dest_path = pp.basename(h5i.get_name(source[source_path].id))
+                    dest_path = pp.basename(
+                        h5i.get_name(source[source_path].id))
 
             elif isinstance(dest, HLObject):
                 raise TypeError("Destination must be path or Group object")
@@ -545,4 +555,5 @@ class ExternalLink(object):
         self._path = path
 
     def __repr__(self):
-        return '<ExternalLink to "%s" in file "%s"' % (self.path, self.filename)
+        return '<ExternalLink to "%s" in file "%s"' % (
+            self.path, self.filename)

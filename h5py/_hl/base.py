@@ -50,9 +50,9 @@ def guess_dtype(data):
             return h5t.special_dtype(ref=h5r.RegionReference)
         if isinstance(data, h5r.Reference):
             return h5t.special_dtype(ref=h5r.Reference)
-        if type(data) == bytes:
+        if isinstance(data, bytes):
             return h5t.special_dtype(vlen=bytes)
-        if type(data) == six.text_type:
+        if isinstance(data, six.text_type):
             return h5t.special_dtype(vlen=six.text_type)
 
         return None
@@ -72,6 +72,7 @@ def default_lcpl():
     lcpl = h5p.create(h5p.LINK_CREATE)
     lcpl.set_create_intermediate_group(True)
     return lcpl
+
 
 dlapl = default_lapl()
 dlcpl = default_lcpl()

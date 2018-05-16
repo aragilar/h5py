@@ -16,6 +16,7 @@ from __future__ import absolute_import
 import numpy as np
 from .. import h5s
 
+
 def read_dtypes(dataset_dtype, names):
     """ Returns a 2-tuple containing:
 
@@ -33,10 +34,12 @@ def read_dtypes(dataset_dtype, names):
         raise ValueError("Field does not appear in this type.")
 
     else:
-        format_dtype = np.dtype([(name, dataset_dtype.fields[name][0]) for name in names])
+        format_dtype = np.dtype(
+            [(name, dataset_dtype.fields[name][0]) for name in names])
 
     if len(names) == 1:
-        # We don't preserve the field information if only one explicitly selected.
+        # We don't preserve the field information if only one explicitly
+        # selected.
         output_dtype = format_dtype.fields[names[0]][0]
 
     else:
@@ -73,6 +76,7 @@ def read_selections_scalar(dsid, args):
 
     return out_shape, source_space
 
+
 class ScalarReadSelection(object):
 
     """
@@ -93,6 +97,7 @@ class ScalarReadSelection(object):
     def __iter__(self):
         self.mspace.select_all()
         yield self.fspace, self.mspace
+
 
 def select_read(fspace, args):
     """ Top-level dispatch function for reading.

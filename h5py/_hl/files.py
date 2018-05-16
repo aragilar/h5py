@@ -172,8 +172,10 @@ def make_fid(name, mode, userblock_size, fapl, fcpl=None, swmr=False):
         if userblock_size is not None:
             existing_fcpl = fid.get_create_plist()
             if existing_fcpl.get_userblock() != userblock_size:
-                raise ValueError("Requested userblock size (%d) does not match that of existing file (%d)" % (userblock_size, existing_fcpl.get_userblock()))
-    except:
+                raise ValueError(
+                    "Requested userblock size (%d) does not match that of existing file (%d)" %
+                    (userblock_size, existing_fcpl.get_userblock()))
+    except BaseException:
         fid.close()
         raise
 
@@ -238,7 +240,6 @@ class File(Group):
         fcpl = self.fid.get_create_plist()
         return fcpl.get_userblock()
 
-
     if mpi and hdf5_version >= (1, 8, 9):
 
         @property
@@ -268,7 +269,8 @@ class File(Group):
                 self.id.start_swmr_write()
                 self._swmr_mode = True
             else:
-                raise ValueError("It is not possible to forcibly switch SWMR mode off.")
+                raise ValueError(
+                    "It is not possible to forcibly switch SWMR mode off.")
 
     def __init__(self, name, mode=None, driver=None,
                  libver=None, userblock_size=None, swmr=False, **kwds):
@@ -300,7 +302,8 @@ class File(Group):
             Passed on to the selected file driver.
         """
         if swmr and not swmr_support:
-            raise ValueError("The SWMR feature is not available in this version of the HDF5 library")
+            raise ValueError(
+                "The SWMR feature is not available in this version of the HDF5 library")
 
         if isinstance(name, _objects.ObjectID):
             with phil:
@@ -323,15 +326,18 @@ class File(Group):
         with phil:
             # Check that the file is still open, otherwise skip
             if self.id.valid:
-                # We have to explicitly murder all open objects related to the file
+                # We have to explicitly murder all open objects related to the
+                # file
 
                 # Close file-resident objects first, then the files.
                 # Otherwise we get errors in MPI mode.
                 id_list = h5f.get_obj_ids(self.id, ~h5f.OBJ_FILE)
                 file_list = h5f.get_obj_ids(self.id, h5f.OBJ_FILE)
 
-                id_list = [x for x in id_list if h5i.get_file_id(x).id == self.id.id]
-                file_list = [x for x in file_list if h5i.get_file_id(x).id == self.id.id]
+                id_list = [
+                    x for x in id_list if h5i.get_file_id(x).id == self.id.id]
+                file_list = [
+                    x for x in file_list if h5i.get_file_id(x).id == self.id.id]
 
                 for id_ in id_list:
                     while id_.valid:

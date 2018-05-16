@@ -1,4 +1,4 @@
-#+
+# +
 #
 # This file is part of h5py, a low-level Python interface to the HDF5 library.
 #
@@ -9,7 +9,7 @@
 # http://h5py.alfven.org
 # License: BSD  (See LICENSE.txt for full license)
 #
-#-
+# -
 
 # pylint: disable=eval-used,protected-access
 
@@ -29,8 +29,8 @@
 
       f['item1'].at<tab>
 
-    will perform tab completion for the attributes in the usual way. This should
-    also work::
+    will perform tab completion for the attributes in the usual way. This
+    should also work::
 
       a = b = f['item1'].attrs.<tab>
 
@@ -172,7 +172,8 @@ def h5py_completer(self, event):
     """ Completer function to be loaded into IPython """
     base = re_object_match.split(event.line)[1]
 
-    if not isinstance(self._ofind(base).get('obj'), (AttributeManager, HLObject)):
+    if not isinstance(self._ofind(base).get('obj'),
+                      (AttributeManager, HLObject)):
         raise TryNext
 
     try:

@@ -27,7 +27,8 @@ try:
 except ImportError:
     import os.path as _op
     if _op.exists(_op.join(_op.dirname(__file__), '..', 'setup.py')):
-        raise ImportError("You cannot import h5py from inside the install directory.\nChange to another directory first.")
+        raise ImportError(
+            "You cannot import h5py from inside the install directory.\nChange to another directory first.")
     else:
         raise
 
@@ -67,9 +68,9 @@ from .version import version as __version__
 
 if version.hdf5_version_tuple != version.hdf5_built_version_tuple:
     _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
-        "this may cause problems").format(
-            '{0}.{1}.{2}'.format(*version.hdf5_version_tuple),
-            '{0}.{1}.{2}'.format(*version.hdf5_built_version_tuple)
+           "this may cause problems").format(
+        '{0}.{1}.{2}'.format(*version.hdf5_version_tuple),
+        '{0}.{1}.{2}'.format(*version.hdf5_built_version_tuple)
     ))
 
 

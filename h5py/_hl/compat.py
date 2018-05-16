@@ -45,6 +45,8 @@ except ImportError:
 # This was introduced into python 3.2, so python < 3.2 does not have this
 # Effectively, this is only required for python 2.6 and 2.7, and can be removed
 # once support for them is dropped
+
+
 def _fscodec():
     encoding = sys.getfilesystemencoding()
     if encoding == 'mbcs':
@@ -69,7 +71,9 @@ def _fscodec():
         elif isinstance(filename, six.text_type):
             return filename.encode(encoding, errors)
         else:
-            raise TypeError("expect bytes or str, not %s" % type(filename).__name__)
+            raise TypeError(
+                "expect bytes or str, not %s" %
+                type(filename).__name__)
 
     def fsdecode(filename):
         """
@@ -82,9 +86,12 @@ def _fscodec():
         elif isinstance(filename, six.binary_type):
             return filename.decode(encoding, errors)
         else:
-            raise TypeError("expect bytes or str, not %s" % type(filename).__name__)
+            raise TypeError(
+                "expect bytes or str, not %s" %
+                type(filename).__name__)
 
     return fsencode, fsdecode
+
 
 _fsencode, _fsdecode = _fscodec()
 del _fscodec
@@ -130,5 +137,7 @@ def filename_decode(filename):
         elif isinstance(filename, six.text_type):
             return filename
         else:
-            raise TypeError("expect bytes or str, not %s" % type(filename).__name__)
+            raise TypeError(
+                "expect bytes or str, not %s" %
+                type(filename).__name__)
     return fsdecode(filename)

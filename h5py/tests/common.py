@@ -24,7 +24,7 @@ if sys.version_info[0] == 2:
     try:
         import unittest2 as ut
     except ImportError:
-        raise ImportError( "unittest2 is required to run tests with Python 2")
+        raise ImportError("unittest2 is required to run tests with Python 2")
 else:
     import unittest as ut
 
@@ -71,7 +71,7 @@ class TestCase(ut.TestCase):
         try:
             if self.f:
                 self.f.close()
-        except:
+        except BaseException:
             pass
 
     def assertSameElements(self, a, b):
@@ -108,36 +108,37 @@ class TestCase(ut.TestCase):
             self.assert_(
                 np.isscalar(dset) and np.isscalar(arr),
                 'Scalar/array mismatch ("%r" vs "%r")%s' % (dset, arr, message)
-                )
+            )
             self.assert_(
                 dset - arr < precision,
                 "Scalars differ by more than %.3f%s" % (precision, message)
-                )
+            )
             return
 
         self.assert_(
             dset.shape == arr.shape,
             "Shape mismatch (%s vs %s)%s" % (dset.shape, arr.shape, message)
-            )
+        )
         self.assert_(
             dset.dtype == arr.dtype,
             "Dtype mismatch (%s vs %s)%s" % (dset.dtype, arr.dtype, message)
-            )
+        )
 
         if arr.dtype.names is not None:
             for n in arr.dtype.names:
                 message = '[FIELD %s] %s' % (n, message)
-                self.assertArrayEqual(dset[n], arr[n], message=message, precision=precision)
+                self.assertArrayEqual(
+                    dset[n], arr[n], message=message, precision=precision)
         elif arr.dtype.kind in ('i', 'f'):
             self.assert_(
                 np.all(np.abs(dset[...] - arr[...]) < precision),
                 "Arrays differ by more than %.3f%s" % (precision, message)
-                )
+            )
         else:
             self.assert_(
                 np.all(dset[...] == arr[...]),
                 "Arrays are not equal (dtype %s) %s" % (arr.dtype.str, message)
-                )
+            )
 
     def assertNumpyBehavior(self, dset, arr, s):
         """ Apply slicing arguments "s" to both dset and arr.
@@ -159,7 +160,9 @@ class TestCase(ut.TestCase):
             with self.assertRaises(exc):
                 dset[s]
 
+
 NUMPY_RELEASE_VERSION = tuple([int(i) for i in np.__version__.split(".")[0:2]])
+
 
 @contextmanager
 def closed_tempfile(suffix='', text=None):

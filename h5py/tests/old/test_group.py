@@ -30,8 +30,8 @@ import six
 
 from ..common import ut, TestCase
 import h5py
-from h5py.highlevel import File, Group, SoftLink, HardLink, ExternalLink
-from h5py.highlevel import Dataset, Datatype
+from h5py import File, Group, SoftLink, HardLink, ExternalLink
+from h5py import Dataset, Datatype
 from h5py import h5t
 from h5py._hl.compat import filename_encode
 
@@ -54,6 +54,7 @@ class BaseGroup(TestCase):
         if self.f:
             self.f.close()
 
+
 class TestRepr(BaseGroup):
 
     """
@@ -66,6 +67,7 @@ class TestRepr(BaseGroup):
         self.assertIsInstance(g, six.string_types)
         self.f.close()
         self.assertIsInstance(g, six.string_types)
+
 
 class TestCreate(BaseGroup):
 
@@ -94,7 +96,10 @@ class TestCreate(BaseGroup):
         name = u"/Name" + six.unichr(0x4500)
         group = self.f.create_group(name)
         self.assertEqual(group.name, name)
-        self.assertEqual(group.id.links.get_info(name.encode('utf8')).cset, h5t.CSET_UTF8)
+        self.assertEqual(
+            group.id.links.get_info(
+                name.encode('utf8')).cset,
+            h5t.CSET_UTF8)
 
     def test_unicode_default(self):
         """ Unicode names convertible to ASCII are stored as ASCII (issue 239)
@@ -102,13 +107,17 @@ class TestCreate(BaseGroup):
         name = u"/Hello, this is a name"
         group = self.f.create_group(name)
         self.assertEqual(group.name, name)
-        self.assertEqual(group.id.links.get_info(name.encode('utf8')).cset, h5t.CSET_ASCII)
+        self.assertEqual(
+            group.id.links.get_info(
+                name.encode('utf8')).cset,
+            h5t.CSET_ASCII)
 
     def test_appropriate_low_level_id(self):
         " Binding a group to a non-group identifier fails with ValueError "
         dset = self.f.create_dataset('foo', [1])
         with self.assertRaises(ValueError):
             Group(dset.id)
+
 
 class TestDatasetAssignment(BaseGroup):
 
@@ -118,10 +127,11 @@ class TestDatasetAssignment(BaseGroup):
 
     def test_ndarray(self):
         """ Dataset auto-creation by direct assignment """
-        data = np.ones((4,4),dtype='f')
+        data = np.ones((4, 4), dtype='f')
         self.f['a'] = data
         self.assertIsInstance(self.f['a'], Dataset)
         self.assertArrayEqual(self.f['a'][...], data)
+
 
 class TestDtypeAssignment(BaseGroup):
 
@@ -135,6 +145,7 @@ class TestDtypeAssignment(BaseGroup):
         self.f['a'] = dtype
         self.assertIsInstance(self.f['a'], Datatype)
         self.assertEqual(self.f['a'].dtype, dtype)
+
 
 class TestRequire(BaseGroup):
 
@@ -160,6 +171,7 @@ class TestRequire(BaseGroup):
         with self.assertRaises(TypeError):
             self.f.require_group('foo')
 
+
 class TestDelete(BaseGroup):
 
     """
@@ -183,7 +195,7 @@ class TestDelete(BaseGroup):
         # Note: it is impossible to restore the old behavior (ValueError)
         # without breaking the above test (non-existing objects)
         fname = self.mktemp()
-        hfile = File(fname,'w')
+        hfile = File(fname, 'w')
         try:
             hfile.create_group('foo')
         finally:
@@ -195,6 +207,7 @@ class TestDelete(BaseGroup):
                 del hfile['foo']
         finally:
             hfile.close()
+
 
 class TestOpen(BaseGroup):
 
@@ -229,10 +242,10 @@ class TestOpen(BaseGroup):
         g = self.f.create_group('test')
 
         rtype = h5py.special_dtype(ref=h5py.Reference)
-        dt = np.dtype([('a', 'i'),('b',rtype)])
+        dt = np.dtype([('a', 'i'), ('b', rtype)])
         dset = self.f.create_dataset('test_dset', (1,), dt)
 
-        dset[0] =(42,g.ref)
+        dset[0] = (42, g.ref)
         data = dset[0]
         self.assertEqual(self.f[data[1]], g)
 
@@ -253,6 +266,7 @@ class TestOpen(BaseGroup):
 
     # TODO: check that regionrefs also work with __getitem__
 
+
 class TestRepr(BaseGroup):
 
     """
@@ -266,14 +280,16 @@ class TestRepr(BaseGroup):
         g.id._close()
         self.assertIsInstance(repr(g), six.string_types)
 
+
 class BaseMapping(BaseGroup):
 
     """
         Base class for mapping tests
     """
+
     def setUp(self):
         self.f = File(self.mktemp(), 'w')
-        self.groups = ('a','b','c','d')
+        self.groups = ('a', 'b', 'c', 'd')
         for x in self.groups:
             self.f.create_group(x)
         self.f['x'] = h5py.SoftLink('/mongoose')
@@ -282,6 +298,7 @@ class BaseMapping(BaseGroup):
     def tearDown(self):
         if self.f:
             self.f.close()
+
 
 class TestLen(BaseMapping):
 
@@ -293,13 +310,14 @@ class TestLen(BaseMapping):
         """ len() returns number of group members """
         self.assertEqual(len(self.f), len(self.groups))
         self.f.create_group('e')
-        self.assertEqual(len(self.f), len(self.groups)+1)
+        self.assertEqual(len(self.f), len(self.groups) + 1)
 
     def test_exc(self):
         """ len() on closed group gives ValueError """
         self.f.close()
         with self.assertRaises(ValueError):
             len(self.f)
+
 
 class TestContains(BaseGroup):
 
@@ -352,7 +370,8 @@ class TestContains(BaseGroup):
         """ Broken softlinks are contained, but their members are not """
         self.f.create_group('grp')
         self.f['/grp/soft'] = h5py.SoftLink('/mongoose')
-        self.f['/grp/external'] = h5py.ExternalLink('mongoose.hdf5', '/mongoose')
+        self.f['/grp/external'] = h5py.ExternalLink(
+            'mongoose.hdf5', '/mongoose')
         self.assertIn('/grp/soft', self.f)
         self.assertNotIn('/grp/soft/something', self.f)
         self.assertIn('/grp/external', self.f)
@@ -375,6 +394,7 @@ class TestContains(BaseGroup):
         self.assertIn('dset///', self.f)
         self.assertIn('/dset//', self.f)
 
+
 class TestIter(BaseMapping):
 
     """
@@ -395,6 +415,7 @@ class TestIter(BaseMapping):
         finally:
             hfile.close()
 
+
 class TestTrackOrder(BaseGroup):
     def test_track_order(self):
         g = self.f.create_group('order', track_order=True)
@@ -408,6 +429,7 @@ class TestTrackOrder(BaseGroup):
         objs = [str(i) for i in range(100)]
         objs2 = [o for o in g]
         self.assertEqual(objs, objs2)
+
 
 @ut.skipIf(sys.version_info[0] != 2, "Py2")
 class TestPy2Dict(BaseMapping):
@@ -424,13 +446,15 @@ class TestPy2Dict(BaseMapping):
     def test_values(self):
         """ .values method """
         self.assertIsInstance(self.f.values(), list)
-        self.assertSameElements(self.f.values(), [self.f.get(x) for x in self.groups])
+        self.assertSameElements(
+            self.f.values(), [
+                self.f.get(x) for x in self.groups])
 
     def test_items(self):
         """ .items method """
         self.assertIsInstance(self.f.items(), list)
         self.assertSameElements(self.f.items(),
-            [(x, self.f.get(x)) for x in self.groups])
+                                [(x, self.f.get(x)) for x in self.groups])
 
     def test_iterkeys(self):
         """ .iterkeys method """
@@ -439,12 +463,13 @@ class TestPy2Dict(BaseMapping):
     def test_itervalues(self):
         """ .itervalues method """
         self.assertSameElements([x for x in self.f.itervalues()],
-            [self.f.get(x) for x in self.groups])
+                                [self.f.get(x) for x in self.groups])
 
     def test_iteritems(self):
         """ .iteritems method """
         self.assertSameElements([x for x in self.f.iteritems()],
-            [(x, self.f.get(x)) for x in self.groups])
+                                [(x, self.f.get(x)) for x in self.groups])
+
 
 @ut.skipIf(six.PY2, "Py3")
 class TestPy3Dict(BaseMapping):
@@ -468,19 +493,23 @@ class TestPy3Dict(BaseMapping):
     def test_items(self):
         """ .items provides an item view """
         iv = getattr(self.f, 'items')()
-        self.assertSameElements(list(iv), [(x,self.f.get(x)) for x in self.groups])
+        self.assertSameElements(
+            list(iv), [
+                (x, self.f.get(x)) for x in self.groups])
         self.assertEqual(len(iv), len(self.groups))
         for x in self.groups:
             self.assertIn((x, self.f.get(x)), iv)
+
 
 class TestAdditionalMappingFuncs(BaseMapping):
     """
     Feature: Other dict methods (pop, pop_item, clear, update, setdefault) are
     available.
     """
+
     def setUp(self):
         self.f = File(self.mktemp(), 'w')
-        for x in ('/test/a','/test/b','/test/c','/test/d'):
+        for x in ('/test/a', '/test/b', '/test/c', '/test/d'):
             self.f.create_group(x)
         self.group = self.f['test']
 
@@ -620,13 +649,14 @@ class TestGet(BaseGroup):
         out_sl = self.f.get('soft', getlink=True)
         out_el = self.f.get('external', getlink=True)
 
-        #TODO: redo with SoftLink/ExternalLink built-in equality
+        # TODO: redo with SoftLink/ExternalLink built-in equality
         self.assertIsInstance(out_hl, HardLink)
         self.assertIsInstance(out_sl, SoftLink)
         self.assertEqual(out_sl._path, sl._path)
         self.assertIsInstance(out_el, ExternalLink)
         self.assertEqual(out_el._path, el._path)
         self.assertEqual(out_el._filename, el._filename)
+
 
 class TestVisit(TestCase):
 
@@ -639,7 +669,7 @@ class TestVisit(TestCase):
         self.f = File(self.mktemp(), 'w')
         self.groups = [
             'grp1', 'grp1/sg1', 'grp1/sg2', 'grp2', 'grp2/sg1', 'grp2/sg1/ssg1'
-            ]
+        ]
         for x in self.groups:
             self.f.create_group(x)
 
@@ -656,15 +686,16 @@ class TestVisit(TestCase):
         """ All subgroups and contents are visited """
         l = []
         comp = [(x, self.f[x]) for x in self.groups]
-        self.f.visititems(lambda x, y: l.append((x,y)))
+        self.f.visititems(lambda x, y: l.append((x, y)))
         self.assertSameElements(comp, l)
 
     def test_bailout(self):
         """ Returning a non-None value immediately aborts iteration """
         x = self.f.visit(lambda x: x)
         self.assertEqual(x, self.groups[0])
-        x = self.f.visititems(lambda x, y: (x,y))
+        x = self.f.visititems(lambda x, y: (x, y))
         self.assertEqual(x, (self.groups[0], self.f[self.groups[0]]))
+
 
 class TestSoftLinks(BaseGroup):
 
@@ -696,6 +727,7 @@ class TestSoftLinks(BaseGroup):
         with self.assertRaises(KeyError):
             self.f['alias']
 
+
 class TestExternalLinks(TestCase):
 
     """
@@ -723,7 +755,7 @@ class TestExternalLinks(TestCase):
 
     def test_erepr(self):
         """ External link repr """
-        el = ExternalLink('foo.hdf5','/foo')
+        el = ExternalLink('foo.hdf5', '/foo')
         self.assertIsInstance(repr(el), six.string_types)
 
     def test_create(self):
@@ -744,7 +776,7 @@ class TestExternalLinks(TestCase):
     # class is determined by HDF5.
     def test_exc_missingfile(self):
         """ KeyError raised when attempting to open missing file """
-        self.f['ext'] = ExternalLink('mongoose.hdf5','/foo')
+        self.f['ext'] = ExternalLink('mongoose.hdf5', '/foo')
         with self.assertRaises(KeyError):
             self.f['ext']
 
@@ -794,6 +826,7 @@ class TestExternalLinks(TestCase):
             ext_file[u"α"].attrs["ext_attr"] = "test"
         self.f['ext'] = ExternalLink(ext_filename, u'/α')
         self.assertEqual(self.f["ext"].attrs["ext_attr"], "test")
+
 
 class TestExtLinkBugs(TestCase):
 
@@ -845,127 +878,127 @@ class TestCopy(TestCase):
         if self.f2:
             self.f2.close()
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_path_to_path(self):
         foo = self.f1.create_group('foo')
-        foo['bar'] = [1,2,3]
+        foo['bar'] = [1, 2, 3]
 
         self.f1.copy('foo', 'baz')
         baz = self.f1['baz']
         self.assertIsInstance(baz, Group)
-        self.assertArrayEqual(baz['bar'], np.array([1,2,3]))
+        self.assertArrayEqual(baz['bar'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_path_to_group(self):
         foo = self.f1.create_group('foo')
-        foo['bar'] = [1,2,3]
+        foo['bar'] = [1, 2, 3]
         baz = self.f1.create_group('baz')
 
         self.f1.copy('foo', baz)
         baz = self.f1['baz']
         self.assertIsInstance(baz, Group)
-        self.assertArrayEqual(baz['foo/bar'], np.array([1,2,3]))
+        self.assertArrayEqual(baz['foo/bar'], np.array([1, 2, 3]))
 
         self.f1.copy('foo', self.f2['/'])
         self.assertIsInstance(self.f2['/foo'], Group)
-        self.assertArrayEqual(self.f2['foo/bar'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['foo/bar'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_group_to_path(self):
 
         foo = self.f1.create_group('foo')
-        foo['bar'] = [1,2,3]
+        foo['bar'] = [1, 2, 3]
 
         self.f1.copy(foo, 'baz')
         baz = self.f1['baz']
         self.assertIsInstance(baz, Group)
-        self.assertArrayEqual(baz['bar'], np.array([1,2,3]))
+        self.assertArrayEqual(baz['bar'], np.array([1, 2, 3]))
 
         self.f2.copy(foo, 'foo')
         self.assertIsInstance(self.f2['/foo'], Group)
-        self.assertArrayEqual(self.f2['foo/bar'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['foo/bar'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_group_to_group(self):
 
         foo = self.f1.create_group('foo')
-        foo['bar'] = [1,2,3]
+        foo['bar'] = [1, 2, 3]
         baz = self.f1.create_group('baz')
 
         self.f1.copy(foo, baz)
         baz = self.f1['baz']
         self.assertIsInstance(baz, Group)
-        self.assertArrayEqual(baz['foo/bar'], np.array([1,2,3]))
+        self.assertArrayEqual(baz['foo/bar'], np.array([1, 2, 3]))
 
         self.f1.copy(foo, self.f2['/'])
         self.assertIsInstance(self.f2['/foo'], Group)
-        self.assertArrayEqual(self.f2['foo/bar'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['foo/bar'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_dataset(self):
-        self.f1['foo'] = [1,2,3]
+        self.f1['foo'] = [1, 2, 3]
         foo = self.f1['foo']
 
         self.f1.copy(foo, 'bar')
-        self.assertArrayEqual(self.f1['bar'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f1['bar'], np.array([1, 2, 3]))
 
         self.f1.copy('foo', 'baz')
-        self.assertArrayEqual(self.f1['baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f1['baz'], np.array([1, 2, 3]))
 
         self.f1.copy('foo', self.f2)
-        self.assertArrayEqual(self.f2['foo'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['foo'], np.array([1, 2, 3]))
 
         self.f2.copy(self.f1['foo'], self.f2, 'bar')
-        self.assertArrayEqual(self.f2['bar'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['bar'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_shallow(self):
 
         foo = self.f1.create_group('foo')
         bar = foo.create_group('bar')
-        foo['qux'] = [1,2,3]
-        bar['quux'] = [4,5,6]
+        foo['qux'] = [1, 2, 3]
+        bar['quux'] = [4, 5, 6]
 
         self.f1.copy(foo, 'baz', shallow=True)
         baz = self.f1['baz']
         self.assertIsInstance(baz, Group)
         self.assertIsInstance(baz['bar'], Group)
         self.assertEqual(len(baz['bar']), 0)
-        self.assertArrayEqual(baz['qux'], np.array([1,2,3]))
+        self.assertArrayEqual(baz['qux'], np.array([1, 2, 3]))
 
         self.f2.copy(foo, 'foo', shallow=True)
         self.assertIsInstance(self.f2['/foo'], Group)
         self.assertIsInstance(self.f2['foo/bar'], Group)
         self.assertEqual(len(self.f2['foo/bar']), 0)
-        self.assertArrayEqual(self.f2['foo/qux'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['foo/qux'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_without_attributes(self):
 
-        self.f1['foo'] = [1,2,3]
+        self.f1['foo'] = [1, 2, 3]
         foo = self.f1['foo']
-        foo.attrs['bar'] = [4,5,6]
+        foo.attrs['bar'] = [4, 5, 6]
 
         self.f1.copy(foo, 'baz', without_attrs=True)
-        self.assertArrayEqual(self.f1['baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f1['baz'], np.array([1, 2, 3]))
         self.assert_('bar' not in self.f1['baz'].attrs)
 
         self.f2.copy(foo, 'baz', without_attrs=True)
-        self.assertArrayEqual(self.f2['baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['baz'], np.array([1, 2, 3]))
         self.assert_('bar' not in self.f2['baz'].attrs)
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_soft_links(self):
 
-        self.f1['bar'] = [1,2,3]
+        self.f1['bar'] = [1, 2, 3]
         foo = self.f1.create_group('foo')
         foo['baz'] = SoftLink('/bar')
 
@@ -974,54 +1007,54 @@ class TestCopy(TestCase):
         del self.f1['bar']
 
         self.assertIsInstance(self.f1['qux'], Group)
-        self.assertArrayEqual(self.f1['qux/baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f1['qux/baz'], np.array([1, 2, 3]))
 
         self.assertIsInstance(self.f2['/foo'], Group)
-        self.assertArrayEqual(self.f2['foo/baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['foo/baz'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_external_links(self):
 
         filename = self.f1.filename
-        self.f1['foo'] = [1,2,3]
+        self.f1['foo'] = [1, 2, 3]
         self.f2['bar'] = ExternalLink(filename, 'foo')
         self.f1.close()
         self.f1 = None
 
-        self.assertArrayEqual(self.f2['bar'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['bar'], np.array([1, 2, 3]))
 
         self.f2.copy('bar', 'baz', expand_external=True)
         os.unlink(filename)
-        self.assertArrayEqual(self.f2['baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['baz'], np.array([1, 2, 3]))
 
-    @ut.skipIf(h5py.version.hdf5_version_tuple < (1,8,9),
+    @ut.skipIf(h5py.version.hdf5_version_tuple < (1, 8, 9),
                "Bug in HDF5<1.8.8 prevents copying open dataset")
     def test_copy_refs(self):
 
-        self.f1['foo'] = [1,2,3]
-        self.f1['bar'] = [4,5,6]
+        self.f1['foo'] = [1, 2, 3]
+        self.f1['bar'] = [4, 5, 6]
         foo = self.f1['foo']
         bar = self.f1['bar']
         foo.attrs['bar'] = bar.ref
 
         self.f1.copy(foo, 'baz', expand_refs=True)
-        self.assertArrayEqual(self.f1['baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f1['baz'], np.array([1, 2, 3]))
         baz_bar = self.f1['baz'].attrs['bar']
-        self.assertArrayEqual(self.f1[baz_bar], np.array([4,5,6]))
+        self.assertArrayEqual(self.f1[baz_bar], np.array([4, 5, 6]))
         # The reference points to a copy of bar, not to bar itself.
         self.assertNotEqual(self.f1[baz_bar].name, bar.name)
 
         self.f1.copy('foo', self.f2, 'baz', expand_refs=True)
-        self.assertArrayEqual(self.f2['baz'], np.array([1,2,3]))
+        self.assertArrayEqual(self.f2['baz'], np.array([1, 2, 3]))
         baz_bar = self.f2['baz'].attrs['bar']
-        self.assertArrayEqual(self.f2[baz_bar], np.array([4,5,6]))
+        self.assertArrayEqual(self.f2[baz_bar], np.array([4, 5, 6]))
 
         self.f1.copy('/', self.f2, 'root', expand_refs=True)
-        self.assertArrayEqual(self.f2['root/foo'], np.array([1,2,3]))
-        self.assertArrayEqual(self.f2['root/bar'], np.array([4,5,6]))
+        self.assertArrayEqual(self.f2['root/foo'], np.array([1, 2, 3]))
+        self.assertArrayEqual(self.f2['root/bar'], np.array([4, 5, 6]))
         foo_bar = self.f2['root/foo'].attrs['bar']
-        self.assertArrayEqual(self.f2[foo_bar], np.array([4,5,6]))
+        self.assertArrayEqual(self.f2[foo_bar], np.array([4, 5, 6]))
         # There's only one copy of bar, which the reference points to.
         self.assertEqual(self.f2[foo_bar], self.f2['root/bar'])
 
@@ -1064,6 +1097,7 @@ class TestMutableMapping(BaseGroup):
     '''Tests if the registration of Group as a MutableMapping
     behaves as expected
     '''
+
     def test_resolution(self):
         assert issubclass(Group, collections.MutableMapping)
         grp = self.f.create_group("K")

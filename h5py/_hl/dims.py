@@ -29,7 +29,7 @@ class DimensionProxy(base.CommonStateObject):
     @with_phil
     def label(self):
         """ Get or set the dimension scale label """
-        #return h5ds.get_label(self._id, self._dimension)
+        # return h5ds.get_label(self._id, self._dimension)
         # Produces a segfault for a non-existent label (Fixed in hdf5-1.8.8).
         # Here is a workaround:
         try:
@@ -37,6 +37,7 @@ class DimensionProxy(base.CommonStateObject):
             return self._d(dset.attrs['DIMENSION_LABELS'][self._dimension])
         except (KeyError, IndexError):
             return ''
+
     @label.setter
     @with_phil
     def label(self, val):
@@ -115,7 +116,7 @@ class DimensionProxy(base.CommonStateObject):
             return [
                 (self._d(h5ds.get_scale_name(x)), Dataset(x))
                 for x in scales
-                ]
+            ]
 
     def keys(self):
         """ Get a list of names for the scales on this dimension. """
@@ -132,7 +133,7 @@ class DimensionProxy(base.CommonStateObject):
         if not self._id:
             return "<Dimension of closed HDF5 dataset>"
         return ('<"%s" dimension %d of HDF5 dataset at %s>'
-               % (self.label, self._dimension, id(self._id)))
+                % (self.label, self._dimension, id(self._id)))
 
 
 class DimensionManager(base.MappingHDF5, base.CommonStateObject):

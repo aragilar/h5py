@@ -24,9 +24,9 @@ import collections
 
 from ..common import TestCase, ut
 
-from h5py.highlevel import File
-from h5py import h5a,  h5t
-from h5py.highlevel import AttributeManager
+from h5py import File
+from h5py import h5a, h5t
+from h5py import AttributeManager
 
 
 class BaseAttrs(TestCase):
@@ -61,7 +61,7 @@ class TestAccess(BaseAttrs):
         """ Attribute rank is preserved """
         self.f.attrs['a'] = (4.0, 5.0)
         self.assertEqual(self.f.attrs['a'].shape, (2,))
-        self.assertArrayEqual(self.f.attrs['a'], np.array((4.0,5.0)))
+        self.assertArrayEqual(self.f.attrs['a'], np.array((4.0, 5.0)))
 
     def test_single(self):
         """ Attributes of shape (1,) don't become scalars """
@@ -145,6 +145,7 @@ class TestMutableMapping(BaseAttrs):
     '''Tests if the registration of AttributeManager as a MutableMapping
     behaves as expected
     '''
+
     def test_resolution(self):
         assert issubclass(AttributeManager, collections.MutableMapping)
         assert isinstance(self.f.attrs, collections.MutableMapping)
@@ -159,9 +160,10 @@ class TestMutableMapping(BaseAttrs):
         AttributeManager.__iter__
         AttributeManager.__len__
 
+
 class TestVlen(BaseAttrs):
     def test_vlen(self):
         a = np.array([np.arange(3), np.arange(4)],
-            dtype=h5t.special_dtype(vlen=int))
+                     dtype=h5t.special_dtype(vlen=int))
         self.f.attrs['a'] = a
         self.assertArrayEqual(self.f.attrs['a'][0], a[0])

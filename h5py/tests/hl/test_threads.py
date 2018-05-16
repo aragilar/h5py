@@ -16,7 +16,7 @@ from __future__ import absolute_import
 import threading
 import h5py
 
-from ..common import ut, TestCase
+from ..common import TestCase
 
 
 class TestErrorPrinting(TestCase):
@@ -50,9 +50,11 @@ class TestErrorPrinting(TestCase):
         def test():
 
             with h5py.File(self.mktemp(), 'w') as newfile:
-                newfile['newdata'] = [1,2,3]
+                newfile['newdata'] = [1, 2, 3]
                 try:
-                    nonexistent_attr = newfile['newdata'].attrs['nonexistent_attr']
+                    nonexistent_attr = newfile['newdata'].attrs[
+                        'nonexistent_attr'
+                    ]
                 except KeyError:
                     pass
 

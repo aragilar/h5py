@@ -24,6 +24,7 @@ from ..common import ut, TestCase
 from h5py import File
 from h5py._hl.datatype import Datatype
 
+
 class BaseType(TestCase):
 
     def setUp(self):
@@ -32,6 +33,7 @@ class BaseType(TestCase):
     def tearDown(self):
         if self.f:
             self.f.close()
+
 
 class TestCreation(BaseType):
 
@@ -46,7 +48,6 @@ class TestCreation(BaseType):
         self.assertIsInstance(repr(dt), six.string_types)
         self.f.close()
         self.assertIsInstance(repr(dt), six.string_types)
-
 
     def test_appropriate_low_level_id(self):
         " Binding a group to a non-TypeID identifier fails with ValueError "

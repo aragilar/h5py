@@ -6,7 +6,8 @@ import h5py
 from ..common import ut, TestCase
 
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple < (1, 9, 178), 'SWMR is available. Skipping backwards compatible tests')
+@ut.skipUnless(h5py.version.hdf5_version_tuple < (1, 9, 178),
+               'SWMR is available. Skipping backwards compatible tests')
 class TestSwmrNotAvailable(TestCase):
     """ Test backwards compatibility behaviour when using SWMR functions with
     an older version of HDF5 which does not have this feature available.
@@ -16,7 +17,10 @@ class TestSwmrNotAvailable(TestCase):
     def setUp(self):
         TestCase.setUp(self)
         self.data = np.arange(13).astype('f')
-        self.dset = self.f.create_dataset('data', chunks=(13,), maxshape=(None,), data=self.data)
+        self.dset = self.f.create_dataset(
+            'data', chunks=(
+                13,), maxshape=(
+                None,), data=self.data)
 
     def test_open_swmr_raises(self):
         fname = self.f.filename
@@ -26,7 +30,8 @@ class TestSwmrNotAvailable(TestCase):
             self.f = h5py.File(fname, 'r', swmr=True)
 
     def test_refresh_raises(self):
-        """ If the SWMR feature is not available then Dataset.refresh() should throw an AttributeError
+        """ If the SWMR feature is not available then Dataset.refresh() should
+        throw an AttributeError
         """
         with self.assertRaises(AttributeError):
             self.dset.refresh()
@@ -42,7 +47,9 @@ class TestSwmrNotAvailable(TestCase):
         with self.assertRaises(AttributeError):
             self.f.swmr_mode
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 9, 178), 'SWMR requires HDF5 >= 1.9.178')
+
+@ut.skipUnless(h5py.version.hdf5_version_tuple >= (
+    1, 9, 178), 'SWMR requires HDF5 >= 1.9.178')
 class TestDatasetSwmrRead(TestCase):
     """ Testing SWMR functions when reading a dataset.
     Skip this test if the HDF5 library does not have the SWMR features.
@@ -51,7 +58,10 @@ class TestDatasetSwmrRead(TestCase):
     def setUp(self):
         TestCase.setUp(self)
         self.data = np.arange(13).astype('f')
-        self.dset = self.f.create_dataset('data', chunks=(13,), maxshape=(None,), data=self.data)
+        self.dset = self.f.create_dataset(
+            'data', chunks=(
+                13,), maxshape=(
+                None,), data=self.data)
         fname = self.f.filename
         self.f.close()
 
@@ -77,13 +87,16 @@ class TestDatasetSwmrRead(TestCase):
 
     def test_force_swmr_mode_off_raises(self):
         """ Switching SWMR write mode off is only possible by closing the file.
-        Attempts to forcibly switch off the SWMR mode should raise a ValueError.
+        Attempts to forcibly switch off the SWMR mode should raise a
+        ValueError.
         """
         with self.assertRaises(ValueError):
             self.f.swmr_mode = False
         self.assertTrue(self.f.swmr_mode)
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 9, 178), 'SWMR requires HDF5 >= 1.9.178')
+
+@ut.skipUnless(h5py.version.hdf5_version_tuple >= (
+    1, 9, 178), 'SWMR requires HDF5 >= 1.9.178')
 class TestDatasetSwmrWrite(TestCase):
     """ Testing SWMR functions when reading a dataset.
     Skip this test if the HDF5 library does not have the SWMR features.
@@ -99,8 +112,11 @@ class TestDatasetSwmrWrite(TestCase):
         self.f = h5py.File(self.mktemp(), 'w', libver='latest')
 
         self.data = np.arange(4).astype('f')
-        self.dset = self.f.create_dataset('data', shape=(0,), dtype=self.data.dtype, chunks=(2,), maxshape=(None,))
-
+        self.dset = self.f.create_dataset(
+            'data', shape=(
+                0,), dtype=self.data.dtype, chunks=(
+                2,), maxshape=(
+                None,))
 
     def test_initial_swmr_mode_off(self):
         """ Verify that the file is not initially in SWMR mode"""
@@ -113,7 +129,8 @@ class TestDatasetSwmrWrite(TestCase):
 
     def test_switch_swmr_mode_off_raises(self):
         """ Switching SWMR write mode off is only possible by closing the file.
-        Attempts to forcibly switch off the SWMR mode should raise a ValueError.
+        Attempts to forcibly switch off the SWMR mode should raise a
+        ValueError.
         """
         self.f.swmr_mode = True
         self.assertTrue(self.f.swmr_mode)
@@ -127,7 +144,7 @@ class TestDatasetSwmrWrite(TestCase):
         self.f.swmr_mode = True
         self.assertTrue(self.f.swmr_mode)
 
-        self.dset.resize( self.data.shape )
+        self.dset.resize(self.data.shape)
         self.dset[:] = self.data
         self.dset.flush()
 
@@ -140,7 +157,7 @@ class TestDatasetSwmrWrite(TestCase):
         self.f.swmr_mode = True
         self.assertTrue(self.f.swmr_mode)
 
-        self.dset.resize( (4,) )
+        self.dset.resize((4,))
         self.dset[0:] = self.data
         self.dset.flush()
 
@@ -148,7 +165,7 @@ class TestDatasetSwmrWrite(TestCase):
         self.dset.refresh()
         self.assertArrayEqual(self.dset, self.data)
 
-        self.dset.resize( (8,) )
+        self.dset.resize((8,))
         self.dset[4:] = self.data
         self.dset.flush()
 

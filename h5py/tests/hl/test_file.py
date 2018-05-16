@@ -16,11 +16,12 @@ from __future__ import absolute_import
 import h5py
 from h5py._hl.files import _drivers
 
-from ..common import ut, TestCase
+from ..common import TestCase
 
 
 def nfiles():
     return h5py.h5f.get_obj_count(h5py.h5f.OBJ_ALL, h5py.h5f.OBJ_FILE)
+
 
 def ngroups():
     return h5py.h5f.get_obj_count(h5py.h5f.OBJ_ALL, h5py.h5f.OBJ_GROUP)
@@ -44,24 +45,24 @@ class TestDealloc(TestCase):
         f = h5py.File(fname, 'w')
         g = f['/']
 
-        self.assertEqual(nfiles(), start_nfiles+1)
-        self.assertEqual(ngroups(), start_ngroups+1)
+        self.assertEqual(nfiles(), start_nfiles + 1)
+        self.assertEqual(ngroups(), start_ngroups + 1)
 
         del f
 
         self.assertTrue(g)
         self.assertEqual(nfiles(), start_nfiles)
-        self.assertEqual(ngroups(), start_ngroups+1)
+        self.assertEqual(ngroups(), start_ngroups + 1)
 
         f = g.file
 
         self.assertTrue(f)
-        self.assertEqual(nfiles(), start_nfiles+1)
-        self.assertEqual(ngroups(), start_ngroups+1)
+        self.assertEqual(nfiles(), start_nfiles + 1)
+        self.assertEqual(ngroups(), start_ngroups + 1)
 
         del g
 
-        self.assertEqual(nfiles(), start_nfiles+1)
+        self.assertEqual(nfiles(), start_nfiles + 1)
         self.assertEqual(ngroups(), start_ngroups)
 
         del f

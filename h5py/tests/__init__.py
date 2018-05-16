@@ -19,7 +19,7 @@ MODULES = old.MODULES + hl.MODULES
 
 def mname(obj):
     """ Get the full dotted name of the test method """
-    mod_name = obj.__class__.__module__.replace('h5py.tests.','')
+    mod_name = obj.__class__.__module__.replace('h5py.tests.', '')
     return "%s.%s.%s" % (mod_name, obj.__class__.__name__, obj._testMethodName)
 
 

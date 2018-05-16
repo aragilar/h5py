@@ -125,7 +125,7 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
                 shape = data.shape
 
             use_htype = None    # If a committed type is given, we must use it
-                                # in the call to h5a.create.
+            # in the call to h5a.create.
 
             if isinstance(dtype, Datatype):
                 use_htype = dtype.id
@@ -133,7 +133,8 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
             elif dtype is None:
                 dtype = data.dtype
             else:
-                dtype = numpy.dtype(dtype) # In case a string, e.g. 'i8' is passed
+                # In case a string, e.g. 'i8' is passed
+                dtype = numpy.dtype(dtype)
 
             original_dtype = dtype  # We'll need this for top-level array types
 
@@ -146,18 +147,22 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
 
                 # Make sure the subshape matches the last N axes' sizes.
                 if shape[-len(subshape):] != subshape:
-                    raise ValueError("Array dtype shape %s is incompatible with data shape %s" % (subshape, shape))
+                    raise ValueError(
+                        "Array dtype shape %s is incompatible with data shape %s" %
+                        (subshape, shape))
 
                 # New "advertised" shape and dtype
-                shape = shape[0:len(shape)-len(subshape)]
+                shape = shape[0:len(shape) - len(subshape)]
                 dtype = subdtype
 
             # Not an array type; make sure to check the number of elements
             # is compatible, and reshape if needed.
             else:
 
-                if shape is not None and numpy.product(shape) != numpy.product(data.shape):
-                    raise ValueError("Shape of new attribute conflicts with shape of data")
+                if shape is not None and numpy.product(
+                        shape) != numpy.product(data.shape):
+                    raise ValueError(
+                        "Shape of new attribute conflicts with shape of data")
 
                 if shape != data.shape:
                     data = data.reshape(shape)
@@ -169,7 +174,8 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
             # Make HDF5 datatype and dataspace for the H5A calls
             if use_htype is None:
                 htype = h5t.py_create(original_dtype, logical=True)
-                htype2 = h5t.py_create(original_dtype)  # Must be bit-for-bit representation rather than logical
+                # Must be bit-for-bit representation rather than logical
+                htype2 = h5t.py_create(original_dtype)
             else:
                 htype = use_htype
                 htype2 = None
@@ -186,13 +192,13 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
 
             try:
                 attr = h5a.create(self._id, self._e(tempname), htype, space)
-            except:
+            except BaseException:
                 raise
             else:
                 try:
                     if not isinstance(data, Empty):
                         attr.write(data, mtype=htype2)
-                except:
+                except BaseException:
                     attr.close()
                     h5a.delete(self._id, self._e(tempname))
                     raise
@@ -202,7 +208,7 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
                         if h5a.exists(self._id, self._e(name)):
                             h5a.delete(self._id, self._e(name))
                         h5a.rename(self._id, self._e(tempname), self._e(name))
-                    except:
+                    except BaseException:
                         attr.close()
                         h5a.delete(self._id, self._e(tempname))
                         raise
@@ -230,7 +236,8 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
                 # Allow the case of () <-> (1,)
                 if (value.shape != attr.shape) and not \
                    (numpy.product(value.shape) == 1 and numpy.product(attr.shape) == 1):
-                    raise TypeError("Shape of data is incompatible with existing attribute")
+                    raise TypeError(
+                        "Shape of data is incompatible with existing attribute")
                 attr.write(value)
 
     @with_phil
@@ -244,6 +251,7 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
         with phil:
 
             attrlist = []
+
             def iter_cb(name, *args):
                 """ Callback to gather attribute names """
                 attrlist.append(self._d(name))

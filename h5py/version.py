@@ -38,7 +38,7 @@ if version_tuple.dev is not None:
 hdf5_version_tuple = _h5.get_libversion()
 hdf5_version = "%d.%d.%d" % hdf5_version_tuple
 
-api_version_tuple = (1,8)
+api_version_tuple = (1, 8)
 api_version = "%d.%d" % api_version_tuple
 
 info = """\
@@ -51,9 +51,9 @@ Python  %(python)s
 sys.platform    %(platform)s
 sys.maxsize     %(maxsize)s
 numpy   %(numpy)s
-""" % { 'h5py': version,
-        'hdf5': hdf5_version,
-        'python': sys.version,
-        'platform': sys.platform,
-        'maxsize': sys.maxsize,
-        'numpy': numpy.__version__ }
+""" % {'h5py': version,
+       'hdf5': hdf5_version,
+       'python': sys.version,
+       'platform': sys.platform,
+       'maxsize': sys.maxsize,
+       'numpy': numpy.__version__}

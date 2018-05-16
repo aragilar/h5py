@@ -13,6 +13,7 @@ from h5py import _objects as o
 
 from ..common import TestCase
 
+
 class TestObjects(TestCase):
 
     def test_invalid(self):

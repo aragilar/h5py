@@ -89,7 +89,7 @@ class TestEmpty(TestCase):
     def test_indexlist(self):
         """ index list -> ValueError """
         with self.assertRaises(ValueError):
-            self.dset[[1,2,5]]
+            self.dset[[1, 2, 5]]
 
     def test_mask(self):
         """ mask -> ValueError """
@@ -142,7 +142,7 @@ class TestScalarFloat(TestCase):
     def test_indexlist(self):
         """ index list -> ValueError """
         with self.assertRaises(ValueError):
-            self.dset[[1,2,5]]
+            self.dset[[1, 2, 5]]
 
     # FIXME: NumPy permits this
     def test_mask(self):
@@ -161,7 +161,8 @@ class TestScalarCompound(TestCase):
 
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.array((42.5, -118, "Hello"), dtype=[('a', 'f'), ('b', 'i'), ('c', '|S10')])
+        self.data = np.array((42.5, -118, "Hello"),
+                             dtype=[('a', 'f'), ('b', 'i'), ('c', '|S10')])
         self.dset = self.f.create_dataset('x', data=self.data)
 
     def test_ndim(self):
@@ -200,7 +201,7 @@ class TestScalarCompound(TestCase):
     def test_indexlist(self):
         """ index list -> ValueError """
         with self.assertRaises(ValueError):
-            self.dset[[1,2,5]]
+            self.dset[[1, 2, 5]]
 
     # FIXME: NumPy permits this
     def test_mask(self):
@@ -273,7 +274,8 @@ class TestScalarArray(TestCase):
             self.dset['field']
 
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 8, 7), 'HDF5 1.8.7+ required')
+@ut.skipUnless(h5py.version.hdf5_version_tuple >=
+               (1, 8, 7), 'HDF5 1.8.7+ required')
 class Test1DZeroFloat(TestCase):
 
     def setUp(self):
@@ -401,16 +403,20 @@ class Test1DFloat(TestCase):
             self.dset[100]
 
     def test_indexlist_simple(self):
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[[1,2,5]])
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[[1, 2, 5]])
 
     def test_indexlist_single_index_ellipsis(self):
         self.assertNumpyBehavior(self.dset, self.data, np.s_[[0], ...])
 
     def test_indexlist_numpyarray_single_index_ellipsis(self):
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[np.array([0]), ...])
+        self.assertNumpyBehavior(
+            self.dset, self.data, np.s_[
+                np.array(
+                    [0]), ...])
 
     def test_indexlist_numpyarray_ellipsis(self):
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[np.array([1, 2, 5]), ...])
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[
+                                 np.array([1, 2, 5]), ...])
 
     # Another UnboundLocalError
     @ut.expectedFailure
@@ -425,12 +431,12 @@ class Test1DFloat(TestCase):
     def test_indexlist_nonmonotonic(self):
         """ we require index list values to be strictly increasing """
         with self.assertRaises(TypeError):
-            self.dset[[1,3,2]]
+            self.dset[[1, 3, 2]]
 
     def test_indexlist_repeated(self):
         """ we forbid repeated index values """
         with self.assertRaises(TypeError):
-            self.dset[[1,1,2]]
+            self.dset[[1, 1, 2]]
 
     def test_mask_true(self):
         self.assertNumpyBehavior(self.dset, self.data, np.s_[self.data > -100])
@@ -452,12 +458,13 @@ class Test1DFloat(TestCase):
             self.dset['field']
 
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 8, 7), 'HDF5 1.8.7+ required')
+@ut.skipUnless(h5py.version.hdf5_version_tuple >=
+               (1, 8, 7), 'HDF5 1.8.7+ required')
 class Test2DZeroFloat(TestCase):
 
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.ones((0,3), dtype='f')
+        self.data = np.ones((0, 3), dtype='f')
         self.dset = self.f.create_dataset('x', data=self.data)
 
     def test_ndim(self):
@@ -471,7 +478,7 @@ class Test2DZeroFloat(TestCase):
     @ut.expectedFailure
     def test_indexlist(self):
         """ see issue #473 """
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[:,[0,1,2]])
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[:, [0, 1, 2]])
 
 
 class TestVeryLargeArray(TestCase):

@@ -26,7 +26,8 @@ class TestFilters(TestCase):
         self.path = self.mktemp()
         self.f = h5py.File(self.path, 'w')
 
-    @ut.skipUnless(h5py.h5z.filter_avail(h5py.h5z.FILTER_SZIP), 'szip filter required')
+    @ut.skipUnless(h5py.h5z.filter_avail(
+        h5py.h5z.FILTER_SZIP), 'szip filter required')
     def test_wr_szip_fletcher32_64bit(self):
         """ test combination of szip, fletcher32, and 64bit arrays
 

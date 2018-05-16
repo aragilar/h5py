@@ -18,6 +18,7 @@ import posixpath as pp
 from ..h5t import TypeID
 from .base import HLObject, with_phil
 
+
 class Datatype(HLObject):
 
     """

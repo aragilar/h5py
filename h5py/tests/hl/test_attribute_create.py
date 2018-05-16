@@ -16,7 +16,8 @@ from __future__ import absolute_import
 import numpy as np
 import h5py
 
-from ..common import ut, TestCase
+from ..common import TestCase
+
 
 class TestArray(TestCase):
 
