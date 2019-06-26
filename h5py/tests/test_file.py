@@ -27,6 +27,7 @@ from .. import h5
 
 import pathlib
 
+
 class TestFileOpen(TestCase):
 
     """
