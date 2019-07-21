@@ -103,6 +103,13 @@ def make_new_dset(parent, shape=None, dtype=None, data=None,
                  "{} is not compatible with {}".format(chunks, shape)
         raise ValueError(errmsg)
 
+    if (
+        dtype is not None and data is not None and
+        getattr(dtype, 'type', None) == numpy.void and
+        getattr(getattr(data, 'dtype', None), 'type', None) != numpy.void
+    ):
+        data = data.view(dtype)
+
     if isinstance(dtype, Datatype):
         # Named types are used as-is
         tid = dtype.id

@@ -1497,8 +1497,14 @@ cdef TypeArrayID _c_array(dtype dt, int logical):
     return array_create(type_base, shape)
 
 cdef TypeOpaqueID _c_opaque(dtype dt):
-    # Opaque
-    return TypeOpaqueID(H5Tcreate(H5T_OPAQUE, dt.itemsize))
+    try:
+        tag = dt.metadata.get('tag', None)
+    except AttributeError:
+        tag = None
+    h5dt = TypeOpaqueID(H5Tcreate(H5T_OPAQUE, dt.itemsize))
+    if tag is not None:
+        h5dt.set_tag(tag.encode('utf-8'))
+    return h5dt
 
 cdef TypeStringID _c_string(dtype dt):
     # Strings (fixed-length)
@@ -1769,6 +1775,16 @@ def enum_dtype(values_dict, basetype=np.uint8):
 
     return dtype(dt, metadata={'enum': values_dict})
 
+def opaque_dtype(dtype_, tag):
+    """Create a NumPy representation of an tagged HDF5 opaque type.
+
+    *dtype_* is the numpy dtype that you wish to store in a tagged opaque type.
+    *tag* is the tag under which you wish to store the opaque type.
+    """
+    dtype_ = dtype(dtype_)
+    size = dtype_.itemsize
+    return dtype(np.void(size), metadata={'dtype': dtype_, 'tag': tag})
+
 ref_dtype = dtype('O', metadata={'ref': Reference})
 regionref_dtype = dtype('O', metadata={'ref': RegionReference})
 
@@ -1874,6 +1890,21 @@ def check_ref_dtype(dt):
         return dt.metadata.get('ref', None)
     except AttributeError:
         return None
+
+def check_opaque_dtype(dt):
+    """If the dtype represents a tagged HDF5 opaque type, returns the numpy
+    dtype which was associated with that tagged opaque type, and the tag stored
+    with the opaque type.
+
+    Returns a 2-tuple of None if the dtype does not represent an HDF5 opaque
+    type.
+    """
+    try:
+        dtype_ = dt.metadata.get('dtype', None)
+        tag = dt.metadata.get('tag', None)
+        return dtype_, tag
+    except AttributeError:
+        return None, None
 
 @with_phil
 def check_dtype(**kwds):
