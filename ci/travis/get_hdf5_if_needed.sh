@@ -6,10 +6,17 @@ if [ -z ${HDF5_DIR+x} ]; then
     echo "Using OS HDF5"
 else
     echo "Using downloaded HDF5"
+    if [ -z ${HDF5_MPI+x} ]; then
+        echo "Building serial"
+        EXTRA_MPI_FLAGS=''
+    else
+        echo "Building with MPI"
+        EXTRA_MPI_FLAGS=--with-parallel
+    fi
     #python3 -m pip install requests
     #python3 ci/get_hdf5.py
     if [ -f $HDF5_DIR/lib/libhdf5.so ]; then
-	echo "using cached build"
+        echo "using cached build"
     else
         pushd /tmp
         #                             Remove trailing .*, to get e.g. '1.12' ↓
@@ -18,9 +25,9 @@ else
         pushd hdf5-$HDF5_VERSION
         chmod u+x autogen.sh
         if [[ "${HDF5_VERSION%.*}" = "1.12" ]]; then
-          ./configure --prefix $HDF5_DIR
+          ./configure --prefix $HDF5_DIR $EXTRA_MPI_FLAGS
         else
-          ./configure --prefix $HDF5_DIR
+          ./configure --prefix $HDF5_DIR $EXTRA_MPI_FLAGS
         fi
         make -j $(nproc)
         make install
