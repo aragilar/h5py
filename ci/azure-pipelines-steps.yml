@@ -45,7 +45,7 @@ steps:
 - ${{ if eq(parameters.installer, 'apt') }}:
   - script: |
       sudo apt-get update
-      sudo apt-get install libhdf5-serial-dev ccache openmpi-bin libopenmpi-dev
+      sudo apt-get install libhdf5-serial-dev ccache openmpi-bin libopenmpi-dev libhdf5-openmpi-dev
     displayName: 'Install dependencies with apt'
 
 - script: |
