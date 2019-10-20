@@ -119,11 +119,13 @@ jobs:
         TOXENV: py36-test-mindeps-mpi4py
         HDF5_MPI: ON
         CC: mpicc
+        OMPI_MCA_btl: self,tcp
       py37-mpi:
         python.version: '3.7'
         TOXENV: py37-test-mindeps-mpi4py
         HDF5_MPI: ON
         CC: mpicc
+        OMPI_MCA_btl: self,tcp
     maxParallel: 4
 
   steps:
