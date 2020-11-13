@@ -18,22 +18,13 @@
 
 import numpy as np
 
-from .common import ut, TestCase
+from .common import TestCase
 
 import h5py
-from h5py import h5s, h5t, h5d
-from h5py import File, MultiBlockSlice
+from h5py import MultiBlockSlice
 
-class BaseSlicing(TestCase):
 
-    def setUp(self):
-        self.f = File(self.mktemp(), 'w')
-
-    def tearDown(self):
-        if self.f:
-            self.f.close()
-
-class TestSingleElement(BaseSlicing):
+class TestSingleElement(TestCase):
 
     """
         Feature: Retrieving a single element works with NumPy semantics
@@ -73,7 +64,7 @@ class TestSingleElement(BaseSlicing):
         self.assertEqual(dset[0], v[0])
         self.assertIsInstance(dset[0], np.void)
 
-class TestObjectIndex(BaseSlicing):
+class TestObjectIndex(TestCase):
 
     """
         Feature: numpy.object_ subtypes map to real Python objects
@@ -124,7 +115,7 @@ class TestSimpleSlicing(TestCase):
     """
 
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        super().setUp()
         self.arr = np.arange(10)
         self.dset = self.f.create_dataset('x', data=self.arr)
 
@@ -146,7 +137,7 @@ class TestSimpleSlicing(TestCase):
         with self.assertRaises(TypeError):
             dset[:, 1] = x
 
-class TestArraySlicing(BaseSlicing):
+class TestArraySlicing(TestCase):
 
     """
         Feature: Array types are handled appropriately
@@ -228,7 +219,7 @@ class TestArraySlicing(BaseSlicing):
         self.assertTrue(np.all(dset[...] == out))
 
 
-class TestZeroLengthSlicing(BaseSlicing):
+class TestZeroLengthSlicing(TestCase):
 
     """
         Slices resulting in empty arrays
@@ -270,7 +261,7 @@ class TestZeroLengthSlicing(BaseSlicing):
             self.assertIsInstance(out, np.ndarray)
             self.assertEqual(out.shape, (0,)+shape[1:])
 
-class TestFieldNames(BaseSlicing):
+class TestFieldNames(TestCase):
 
     """
         Field names for read & write
@@ -280,7 +271,7 @@ class TestFieldNames(BaseSlicing):
     data = np.ones((100,), dtype=dt)
 
     def setUp(self):
-        BaseSlicing.setUp(self)
+        super().setUp()
         self.dset = self.f.create_dataset('x', (100,), dtype=self.dt)
         self.dset[...] = self.data
 
@@ -318,10 +309,10 @@ class TestFieldNames(BaseSlicing):
         self.assertTrue(np.all(self.dset[...] == data2))
 
 
-class TestMultiBlockSlice(BaseSlicing):
+class TestMultiBlockSlice(TestCase):
 
     def setUp(self):
-        super(TestMultiBlockSlice, self).setUp()
+        super().setUp()
         self.arr = np.arange(10)
         self.dset = self.f.create_dataset('x', data=self.arr)
 

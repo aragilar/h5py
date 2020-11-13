@@ -1,7 +1,6 @@
 import pytest
 
 from .common import TestCase
-from h5py import File
 
 
 class TestException(Exception):
@@ -14,8 +13,6 @@ def throwing(name, obj):
 class TestVisit(TestCase):
     def test_visit(self):
         fname = self.mktemp()
-        fid = File(fname, 'w')
-        fid.create_dataset('foo', (100,), dtype='uint8')
+        self.f.create_dataset('foo', (100,), dtype='uint8')
         with pytest.raises(TestException, match='throwing exception'):
-            fid.visititems(throwing)
-        fid.close()
+            self.f.visititems(throwing)

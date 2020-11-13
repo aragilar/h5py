@@ -20,7 +20,6 @@
 import numpy as np
 import os
 import os.path
-import sys
 from tempfile import mkdtemp
 
 from collections.abc import MutableMapping
@@ -42,16 +41,7 @@ else:
     NO_FS_UNICODE = False
 
 
-class BaseGroup(TestCase):
-
-    def setUp(self):
-        self.f = File(self.mktemp(), 'w')
-
-    def tearDown(self):
-        if self.f:
-            self.f.close()
-
-class TestCreate(BaseGroup):
+class TestCreate(TestCase):
 
     """
         Feature: New groups can be created via .create_group method
@@ -100,7 +90,7 @@ class TestCreate(BaseGroup):
         with self.assertRaises(ValueError):
             Group(dset.id)
 
-class TestDatasetAssignment(BaseGroup):
+class TestDatasetAssignment(TestCase):
 
     """
         Feature: Datasets can be created by direct assignment of data
@@ -118,7 +108,7 @@ class TestDatasetAssignment(BaseGroup):
         self.f[b'b'] = data
         self.assertIsInstance(self.f[b'b'], Dataset)
 
-class TestDtypeAssignment(BaseGroup):
+class TestDtypeAssignment(TestCase):
 
     """
         Feature: Named types can be created by direct assignment of dtypes
@@ -138,7 +128,7 @@ class TestDtypeAssignment(BaseGroup):
         self.assertIsInstance(self.f[b'b'], Datatype)
 
 
-class TestRequire(BaseGroup):
+class TestRequire(TestCase):
 
     """
         Feature: Groups can be auto-created, or opened via .require_group
@@ -184,7 +174,7 @@ class TestRequire(BaseGroup):
         group = self.f.get('foo/bar/baz')
         assert isinstance(group, Group)
 
-class TestDelete(BaseGroup):
+class TestDelete(TestCase):
 
     """
         Feature: Objects can be unlinked via "del" operator
@@ -220,7 +210,7 @@ class TestDelete(BaseGroup):
         finally:
             hfile.close()
 
-class TestOpen(BaseGroup):
+class TestOpen(TestCase):
 
     """
         Feature: Objects can be opened via indexing syntax obj[name]
@@ -276,7 +266,8 @@ class TestOpen(BaseGroup):
 
     # TODO: check that regionrefs also work with __getitem__
 
-class TestRepr(BaseGroup):
+
+class TestRepr(TestCase):
     """Opened and closed groups provide a useful __repr__ string"""
 
     def test_repr(self):
@@ -290,22 +281,20 @@ class TestRepr(BaseGroup):
         self.f.close()
         self.assertIsInstance(repr(g), str)
 
-class BaseMapping(BaseGroup):
+
+class BaseMapping(TestCase):
 
     """
         Base class for mapping tests
     """
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        super().setUp()
         self.groups = ('a', 'b', 'c', 'd')
         for x in self.groups:
             self.f.create_group(x)
-        self.f['x'] = h5py.SoftLink('/mongoose')
+        self.f['x'] = SoftLink('/mongoose')
         self.groups = self.groups + ('x',)
 
-    def tearDown(self):
-        if self.f:
-            self.f.close()
 
 class TestLen(BaseMapping):
 
@@ -320,7 +309,7 @@ class TestLen(BaseMapping):
         self.assertEqual(len(self.f), len(self.groups)+1)
 
 
-class TestContains(BaseGroup):
+class TestContains(TestCase):
 
     """
         Feature: The Python "in" builtin tests for membership
@@ -370,8 +359,8 @@ class TestContains(BaseGroup):
     def test_softlinks(self):
         """ Broken softlinks are contained, but their members are not """
         self.f.create_group('grp')
-        self.f['/grp/soft'] = h5py.SoftLink('/mongoose')
-        self.f['/grp/external'] = h5py.ExternalLink('mongoose.hdf5', '/mongoose')
+        self.f['/grp/soft'] = SoftLink('/mongoose')
+        self.f['/grp/external'] = ExternalLink('mongoose.hdf5', '/mongoose')
         self.assertIn('/grp/soft', self.f)
         self.assertNotIn('/grp/soft/something', self.f)
         self.assertIn('/grp/external', self.f)
@@ -414,7 +403,7 @@ class TestIter(BaseMapping):
         finally:
             hfile.close()
 
-class TestTrackOrder(BaseGroup):
+class TestTrackOrder(TestCase):
     def populate(self, g):
         for i in range(100):
             # Mix group and dataset creation.
@@ -461,20 +450,17 @@ class TestPy3Dict(BaseMapping):
         for x in self.groups:
             self.assertIn((x, self.f.get(x)), iv)
 
+
 class TestAdditionalMappingFuncs(BaseMapping):
     """
     Feature: Other dict methods (pop, pop_item, clear, update, setdefault) are
     available.
     """
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        super().setUp()
         for x in ('/test/a', '/test/b', '/test/c', '/test/d'):
             self.f.create_group(x)
         self.group = self.f['test']
-
-    def tearDown(self):
-        if self.f:
-            self.f.close()
 
     def test_pop_item(self):
         """.pop_item exists and removes item"""
@@ -546,7 +532,7 @@ class TestAdditionalMappingFuncs(BaseMapping):
             self.group.setdefault('e')
 
 
-class TestGet(BaseGroup):
+class TestGet(TestCase):
 
     """
         Feature: The .get method allows access to objects and metadata
@@ -624,7 +610,7 @@ class TestVisit(TestCase):
     """
 
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        super().setUp()
         self.groups = [
             'grp1', 'grp1/sg1', 'grp1/sg2', 'grp2', 'grp2/sg1', 'grp2/sg1/ssg1'
             ]
@@ -654,7 +640,7 @@ class TestVisit(TestCase):
         x = self.f.visititems(lambda x, y: (x,y))
         self.assertEqual(x, (self.groups[0], self.f[self.groups[0]]))
 
-class TestSoftLinks(BaseGroup):
+class TestSoftLinks(TestCase):
 
     """
         Feature: Create and manage soft links with the high-level interface
@@ -691,7 +677,7 @@ class TestExternalLinks(TestCase):
     """
 
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        super().setUp()
         self.ename = self.mktemp()
         self.ef = File(self.ename, 'w')
         self.ef.create_group('external')
@@ -824,6 +810,7 @@ class TestExtLinkBugs(TestCase):
 class TestCopy(TestCase):
 
     def setUp(self):
+        super().setUp()
         self.f1 = File(self.mktemp(), 'w')
         self.f2 = File(self.mktemp(), 'w')
 
@@ -1018,7 +1005,7 @@ class TestCopy(TestCase):
         self.assertEqual(self.f2[foo_bar], self.f2['root/bar'])
 
 
-class TestMove(BaseGroup):
+class TestMove(TestCase):
 
     """
         Feature: Group.move moves links in a file
@@ -1034,7 +1021,7 @@ class TestMove(BaseGroup):
 
     def test_move_softlink(self):
         """ Moving a soft link """
-        self.f['soft'] = h5py.SoftLink("relative/path")
+        self.f['soft'] = SoftLink("relative/path")
         self.f.move('soft', 'new_soft')
         lnk = self.f.get('new_soft', getlink=True)
         self.assertEqual(lnk.path, "relative/path")
@@ -1052,7 +1039,7 @@ class TestMove(BaseGroup):
         self.f.move("X", "X")
 
 
-class TestMutableMapping(BaseGroup):
+class TestMutableMapping(TestCase):
     '''Tests if the registration of Group as a MutableMapping
     behaves as expected
     '''

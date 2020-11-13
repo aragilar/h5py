@@ -21,17 +21,8 @@ import numpy as np
 import os
 import tempfile
 
-class BaseTest(TestCase):
 
-    def setUp(self):
-        self.f = File(self.mktemp(), 'w')
-
-    def tearDown(self):
-        if self.f:
-            self.f.close()
-
-
-class TestName(BaseTest):
+class TestName(TestCase):
 
     """
         Feature: .name attribute returns the object name
@@ -42,7 +33,7 @@ class TestName(BaseTest):
         grp = self.f.create_group(None)
         self.assertIs(grp.name, None)
 
-class TestParent(BaseTest):
+class TestParent(TestCase):
 
     """
         test the parent group of the high-level interface objects
@@ -61,7 +52,7 @@ class TestParent(BaseTest):
         parent = sub_grp.parent.name
         self.assertEqual(parent, "/bar")
 
-class TestMapping(BaseTest):
+class TestMapping(TestCase):
 
     """
         Test if the registration of Group as a
@@ -93,7 +84,7 @@ class TestMapping(BaseTest):
         self.assertIsInstance(repr(item_1), str)
 
 
-class TestRepr(BaseTest):
+class TestRepr(TestCase):
 
     """
         repr() works correctly with Unicode names
@@ -137,6 +128,7 @@ class TestRepr(BaseTest):
                 os.unlink(fname)
             except Exception:
                 pass
+
 
 def test_is_hdf5():
     filename = File(tempfile.mktemp(), "w").filename

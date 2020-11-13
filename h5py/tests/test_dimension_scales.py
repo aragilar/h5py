@@ -11,9 +11,8 @@ import sys
 
 import numpy as np
 
-from .common import ut, TestCase
-from h5py import File, Group, Dataset
 import h5py
+from .common import ut, TestCase
 
 
 class BaseDataset(TestCase):
@@ -29,7 +28,7 @@ class BaseDataset(TestCase):
     """
 
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        super().setUp()
         self.f['data'] = np.ones((4, 3, 2), 'f')
         self.f['data2'] = np.ones((4, 3, 2), 'f')
         self.f['x1'] = np.ones((2), 'f')
@@ -45,10 +44,6 @@ class BaseDataset(TestCase):
 
         h5py.h5ds.set_label(self.f['data'].id, 0, b'z')
         h5py.h5ds.set_label(self.f['data'].id, 2, b'x')
-
-    def tearDown(self):
-        if self.f:
-            self.f.close()
 
 
 class TestH5DSBindings(BaseDataset):

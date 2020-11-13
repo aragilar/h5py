@@ -12,7 +12,7 @@ class TestSwmrNotAvailable(TestCase):
     """
 
     def setUp(self):
-        TestCase.setUp(self)
+        super().setUp()
         self.data = np.arange(13).astype('f')
         self.dset = self.f.create_dataset('data', chunks=(13,), maxshape=(None,), data=self.data)
 
@@ -49,6 +49,7 @@ class TestSwmrNotAvailable(TestCase):
             self.f.swmr_mode = True
         assert not self.f.swmr_mode
 
+
 @ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 9, 178), 'SWMR requires HDF5 >= 1.9.178')
 class TestDatasetSwmrRead(TestCase):
     """ Testing SWMR functions when reading a dataset.
@@ -56,7 +57,7 @@ class TestDatasetSwmrRead(TestCase):
     """
 
     def setUp(self):
-        TestCase.setUp(self)
+        super().setUp()
         self.data = np.arange(13).astype('f')
         self.dset = self.f.create_dataset('data', chunks=(13,), maxshape=(None,), data=self.data)
         fname = self.f.filename
@@ -90,6 +91,7 @@ class TestDatasetSwmrRead(TestCase):
             self.f.swmr_mode = False
         self.assertTrue(self.f.swmr_mode)
 
+
 @ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 9, 178), 'SWMR requires HDF5 >= 1.9.178')
 class TestDatasetSwmrWrite(TestCase):
     """ Testing SWMR functions when reading a dataset.
@@ -100,6 +102,7 @@ class TestDatasetSwmrWrite(TestCase):
         """ First setup a file with a small chunked and empty dataset.
         No data written yet.
         """
+        super().setUp()
 
         # Note that when creating the file, the swmr=True is not required for
         # write, but libver='latest' is required.

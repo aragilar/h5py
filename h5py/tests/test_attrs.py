@@ -22,19 +22,9 @@ from collections.abc import MutableMapping
 from .common import TestCase, ut
 
 import h5py
-from h5py import File
-from h5py import h5a,  h5t
+from h5py import h5a, h5t
 from h5py import AttributeManager
 
-
-class BaseAttrs(TestCase):
-
-    def setUp(self):
-        self.f = File(self.mktemp(), 'w')
-
-    def tearDown(self):
-        if self.f:
-            self.f.close()
 
 class TestRepr(TestCase):
 
@@ -50,7 +40,7 @@ class TestRepr(TestCase):
         self.assertIsInstance(repr(grp.attrs), str)
 
 
-class TestAccess(BaseAttrs):
+class TestAccess(TestCase):
 
     """
         Feature: Attribute creation/retrieval via special methods
@@ -130,7 +120,7 @@ class TestAccess(BaseAttrs):
         with self.assertRaises(KeyError):
             self.f.attrs.get_id('b')
 
-class TestDelete(BaseAttrs):
+class TestDelete(TestCase):
 
     """
         Feature: Deletion of attributes using __delitem__
@@ -149,7 +139,7 @@ class TestDelete(BaseAttrs):
             del self.f.attrs['a']
 
 
-class TestUnicode(BaseAttrs):
+class TestUnicode(TestCase):
 
     """
         Feature: Attributes can be accessed via Unicode or byte strings
@@ -176,7 +166,7 @@ class TestUnicode(BaseAttrs):
         self.assertEqual(out, 42)
 
 
-class TestCreate(BaseAttrs):
+class TestCreate(TestCase):
 
     """
         Options for explicit attribute creation
@@ -204,7 +194,7 @@ class TestCreate(BaseAttrs):
         self.f.attrs.create('empty', h5py.Empty(None))
         self.assertEqual(self.f.attrs['empty'], h5py.Empty(None))
 
-class TestMutableMapping(BaseAttrs):
+class TestMutableMapping(TestCase):
     '''Tests if the registration of AttributeManager as a MutableMapping
     behaves as expected
     '''
@@ -222,14 +212,14 @@ class TestMutableMapping(BaseAttrs):
         AttributeManager.__iter__
         AttributeManager.__len__
 
-class TestVlen(BaseAttrs):
+class TestVlen(TestCase):
     def test_vlen(self):
         a = np.array([np.arange(3), np.arange(4)],
             dtype=h5t.vlen_dtype(int))
         self.f.attrs['a'] = a
         self.assertArrayEqual(self.f.attrs['a'][0], a[0])
 
-class TestTrackOrder(BaseAttrs):
+class TestTrackOrder(TestCase):
     def fill_attrs(self, track_order):
         attrs = self.f.create_group('test', track_order=track_order).attrs
         for i in range(100):
@@ -249,7 +239,7 @@ class TestTrackOrder(BaseAttrs):
                          sorted([str(i) for i in range(100)]))
 
 
-class TestDatatype(BaseAttrs):
+class TestDatatype(TestCase):
 
     def test_datatype(self):
         self.f['foo'] = np.dtype('f')

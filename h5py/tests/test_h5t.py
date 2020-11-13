@@ -12,10 +12,10 @@ import numpy as np
 import h5py
 from h5py import h5t
 
-from .common import TestCase, ut
+from .common import TestCase
 
 
-class TestCompound(ut.TestCase):
+class TestCompound(TestCase):
 
     """
         Feature: Compound types can be created from Python dtypes

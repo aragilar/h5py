@@ -23,6 +23,7 @@ class TestFilters(TestCase):
 
     def setUp(self):
         """ like TestCase.setUp but also store the file path """
+        super().setUp()
         self.path = self.mktemp()
         self.f = h5py.File(self.path, 'w')
 
