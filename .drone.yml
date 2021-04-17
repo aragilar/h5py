@@ -1,0 +1,31 @@
+kind: pipeline
+name: arm32
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+- name: test
+  image: python
+  commands:
+  - apt-get update
+  - apt-get install -y libhdf5-dev
+  - pip install tox
+  - tox -r
+---
+kind: pipeline
+name: arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+- name: test
+  image: python
+  commands:
+  - apt-get update
+  - apt-get install -y libhdf5-dev
+  - pip install tox
+  - tox -r
