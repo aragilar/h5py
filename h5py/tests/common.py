@@ -94,7 +94,24 @@ class TestCase(ut.TestCase):
             if not match:
                 raise AssertionError("Item '%s' appears in b but not a" % x)
 
-    def assertArrayEqual(self, dset, arr, message=None, precision=None):
+    def assertArrayEqual(self, dset, arr):
+        """ Make sure dset and arr have the same shape, dtype and contents, to
+            within the given precision.
+
+            Note that dset may be a NumPy array or an HDF5 dataset.
+        """
+        if np.isscalar(dset) or np.isscalar(arr):
+            assert np.isscalar(dset) and np.isscalar(arr), \
+                'Scalar/array mismatch ("%r" vs "%r")%s' % (dset, arr, message)
+        else:
+            assert dset.shape == arr.shape, \
+                "Shape mismatch (%s vs %s)%s" % (dset.shape, arr.shape, message)
+            assert dset.dtype == arr.dtype, \
+                "Dtype mismatch (%s vs %s)%s" % (dset.dtype, arr.dtype, message)
+
+        np.testing.assert_equal(dset[...], arr)
+
+    def assertArrayClose(self, dset, arr, message=None, precision=None):
         """ Make sure dset and arr have the same shape, dtype and contents, to
             within the given precision.
 

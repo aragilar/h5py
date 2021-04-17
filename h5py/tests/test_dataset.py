@@ -685,7 +685,7 @@ class TestCreateScaleOffset(BaseDataset):
         readdata = self.f['foo'][...]
 
         # Test that data round-trips to requested precision
-        self.assertArrayEqual(readdata, testdata, precision=10 ** (-scalefac))
+        self.assertArrayClose(readdata, testdata, precision=10 ** (-scalefac))
 
         # Test that the filter is actually active (i.e. compression is lossy)
         assert not (readdata == testdata).all()

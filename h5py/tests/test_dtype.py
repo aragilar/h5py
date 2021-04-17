@@ -23,11 +23,11 @@ class TestVlen(TestCase):
     """
         Check that storage of vlen strings is carried out correctly.
     """
-    def assertVlenArrayEqual(self, dset, arr, message=None, precision=None):
+    def assertVlenArrayEqual(self, dset, arr):
         assert dset.shape == arr.shape, \
-            "Shape mismatch (%s vs %s)%s" % (dset.shape, arr.shape, message)
+            "Shape mismatch (%s vs %s)" % (dset.shape, arr.shape)
         for (i, d, a) in zip(count(), dset, arr):
-            self.assertArrayEqual(d, a, message, precision)
+            self.assertArrayEqual(d, a)
 
     def test_compound(self):
 
